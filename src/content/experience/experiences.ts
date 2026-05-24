@@ -7,7 +7,7 @@ export const experienceItems = [
     logo: "/img/logos/amazon.png",
     color: "#FF6200",
     link: "https://www.aboutamazon.com/",
-    present: false,
+    present: true,
     incoming: false,
   },
   {
