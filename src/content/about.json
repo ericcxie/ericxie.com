@@ -15,11 +15,11 @@
     "email": "pexie@uwaterloo.ca"
   },
   "current": {
-    "description": "I'm currently on a co-op term in San Francisco. If you're around, let's connect!",
+    "description": "I'm currently on a co-op term in Vancouver. If you're around, let's connect!",
     "location": {
-      "name": "San Francisco, CA",
-      "lng": -122.401,
-      "lat": 37.7946
+      "name": "Vancouver, BC",
+      "lng": -123.1207,
+      "lat": 49.2827
     },
     "interests": [
       {

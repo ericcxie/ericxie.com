@@ -52,7 +52,7 @@ export default async function Home() {
                 {intro.school.name}
               </LinkPreview>
             </span>
-            . Currently, I&apos;m an incoming {intro.company.role} at{" "}
+            . Currently, I&apos;m a {intro.company.role} at{" "}
             <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
               <LinkPreview url={intro.company.url}>
                 {intro.company.name}
