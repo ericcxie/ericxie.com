@@ -4,19 +4,24 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useRef, useState } from "react";
 
+import PhotoLightbox from "@/components/ui/PhotoLightbox";
+
 interface PhotoWithLocation {
   image: string;
   location: string;
+  date?: string;
 }
 
 function PhotoImage({
   photo,
   className,
   onClick,
+  priority,
 }: {
   photo: PhotoWithLocation;
   className?: string;
   onClick?: () => void;
+  priority?: boolean;
 }) {
   return (
     <div className="relative" onClick={onClick}>
@@ -26,9 +31,12 @@ function PhotoImage({
           "h-70 !m-0 w-full gap-5 rounded-lg object-cover object-left-top !p-0 transition duration-500",
           className,
         )}
-        height={400}
-        width={400}
-        alt="thumbnail"
+        height={600}
+        width={600}
+        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        placeholder="empty"
+        loading={priority ? "eager" : "lazy"}
+        alt={photo.location || "photo"}
       />
     </div>
   );
@@ -41,10 +49,8 @@ export const PhotoGallery = ({
   photosWithLocations: PhotoWithLocation[];
   className?: string;
 }) => {
-  const gridRef = useRef<any>(null);
-  const [activeMobilePhoto, setActiveMobilePhoto] = useState<number | null>(
-    null,
-  );
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { scrollYProgress } = useScroll({
     container: gridRef,
     offset: ["start start", "end start"],
@@ -54,10 +60,15 @@ export const PhotoGallery = ({
   const translateSecond = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const translateThird = useTransform(scrollYProgress, [0, 1], [0, -200]);
 
-  const columns: PhotoWithLocation[][] = [[], [], []];
+  // Distribute photos across 3 columns, remembering each photo's original
+  // index so the lightbox can open the full gallery at the right spot.
+  const columns: { photo: PhotoWithLocation; index: number }[][] = [
+    [],
+    [],
+    [],
+  ];
   photosWithLocations.forEach((photo, index) => {
-    const col = index % 3;
-    columns[col].push(photo);
+    columns[index % 3].push({ photo, index });
   });
 
   return (
@@ -74,15 +85,10 @@ export const PhotoGallery = ({
           <div
             key={`mobile-${idx}`}
             className="relative cursor-pointer"
+            onClick={() => setLightboxIndex(idx)}
           >
-            <PhotoImage
-              photo={photo}
-              className={activeMobilePhoto === idx ? "grayscale" : undefined}
-              onClick={() =>
-                setActiveMobilePhoto(activeMobilePhoto === idx ? null : idx)
-              }
-            />
-            {photo.location && activeMobilePhoto === idx && (
+            <PhotoImage photo={photo} priority={idx < 2} />
+            {photo.location && (
               <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
                 📍 {photo.location}
               </div>
@@ -92,41 +98,42 @@ export const PhotoGallery = ({
       </div>
 
       {/* Desktop: 3-column masonry grid */}
-      <div
-        className="mx-auto hidden max-w-5xl grid-cols-1 items-start gap-5 md:grid md:grid-cols-2 lg:grid-cols-3"
-        ref={gridRef}
-      >
+      <div className="mx-auto hidden max-w-5xl grid-cols-1 items-start gap-5 md:grid md:grid-cols-2 lg:grid-cols-3">
         {columns.map((column, colIdx) => {
-          const translate = [translateFirst, translateSecond, translateThird][colIdx];
+          const translate = [translateFirst, translateSecond, translateThird][
+            colIdx
+          ];
           return (
             <div key={colIdx} className="grid gap-5">
-              {column.map((photo, idx) => (
+              {column.map(({ photo, index }) => (
                 <motion.div
                   style={{ y: translate }}
-                  key={`grid-${colIdx}-${idx}`}
-                  className="group relative"
+                  key={`grid-${index}`}
+                  className="group relative cursor-pointer"
+                  onClick={() => setLightboxIndex(index)}
                 >
-                  <a
-                    href={photo.image}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <PhotoImage
-                      photo={photo}
-                      className="hover:grayscale"
-                    />
-                    {photo.location && (
-                      <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-                        📍 {photo.location}
-                      </div>
-                    )}
-                  </a>
+                  <PhotoImage
+                    photo={photo}
+                    priority={index < 3}
+                    className="hover:grayscale"
+                  />
+                  {photo.location && (
+                    <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                      📍 {photo.location}
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
           );
         })}
       </div>
+
+      <PhotoLightbox
+        photos={lightboxIndex !== null ? photosWithLocations : null}
+        startIndex={lightboxIndex ?? 0}
+        onClose={() => setLightboxIndex(null)}
+      />
     </div>
   );
 };

@@ -14,7 +14,10 @@ export default function ThemeSwitcher() {
   }, []);
 
   if (!mounted) {
-    return null;
+    // Reserve the button's footprint so it doesn't pop in on hydration.
+    return (
+      <div className="border-text-text-light-body dark:border-text-dark-headerDark h-8 w-8 rounded-lg border" />
+    );
   }
 
   const toggleTheme = () => {

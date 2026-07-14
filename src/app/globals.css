@@ -84,6 +84,101 @@
   display: none;
 }
 
+/* Photo-thumbnail pins for the "Places I've Been" map */
+.place-marker {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.place-marker:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+}
+
+.place-marker__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #0c0c0c;
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+}
+
+.place-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: none;
+}
+
+.place-popup .mapboxgl-popup-tip {
+  display: none;
+}
+
+.place-popup__inner {
+  width: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fcfcfc;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.dark .place-popup__inner {
+  background: #0c0c0c;
+}
+
+.place-popup__inner img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+}
+
+.place-popup__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+}
+
+.place-popup__loc {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0d0d0b;
+}
+
+.dark .place-popup__loc {
+  color: #e5e5ef;
+}
+
+.place-popup__count {
+  font-size: 11px;
+  color: #6d6d6d;
+}
+
+.dark .place-popup__count {
+  color: #a0a0a0;
+}
+
 .map-marker {
   position: absolute;
   width: 24px;

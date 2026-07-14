@@ -11,11 +11,48 @@
 import { list, del, put } from "@vercel/blob";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import { locationCoordinates } from "../src/content/photos/locations";
 
 interface PhotoEntry {
   filename: string;
   date: string;
   location: string;
+  lng?: number;
+  lat?: number;
+}
+
+const MAPBOX_TOKEN =
+  process.env.MAPBOX_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+/**
+ * Resolve a location string to [lng, lat] via the Mapbox Geocoding API.
+ * Returns null on failure so a single bad lookup never breaks the sync.
+ */
+async function geocode(location: string): Promise<[number, number] | null> {
+  if (!MAPBOX_TOKEN) {
+    console.warn("No Mapbox token set — skipping geocoding.");
+    return null;
+  }
+  try {
+    const url =
+      `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(location)}` +
+      `&limit=1&access_token=${MAPBOX_TOKEN}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error(`Geocode failed for "${location}": ${res.status}`);
+      return null;
+    }
+    const data = await res.json();
+    const coords = data?.features?.[0]?.geometry?.coordinates;
+    if (Array.isArray(coords) && coords.length === 2) {
+      return [coords[0], coords[1]]; // [lng, lat]
+    }
+    console.warn(`No geocode result for "${location}"`);
+    return null;
+  } catch (err) {
+    console.error(`Geocode error for "${location}":`, err);
+    return null;
+  }
 }
 
 interface BlobMetadataEntry {
@@ -98,6 +135,38 @@ async function sync() {
       });
     } catch (err) {
       console.error(`Error downloading ${photo.filename}:`, err);
+    }
+  }
+
+  // Resolve coordinates for each distinct location, reusing any we already
+  // know (from existing photos.json entries or the hardcoded lookup) so we
+  // only ever hit the geocoding API for genuinely new places.
+  const coordCache = new Map<string, [number, number]>();
+  for (const p of localPhotos) {
+    if (p.location && p.lng != null && p.lat != null) {
+      coordCache.set(p.location, [p.lng, p.lat]);
+    }
+  }
+  for (const [loc, coords] of Object.entries(locationCoordinates)) {
+    if (!coordCache.has(loc)) coordCache.set(loc, coords);
+  }
+
+  for (const entry of syncedEntries) {
+    if (!entry.location) continue;
+    let coords = coordCache.get(entry.location);
+    if (!coords) {
+      const geocoded = await geocode(entry.location);
+      if (geocoded) {
+        coords = geocoded;
+        coordCache.set(entry.location, geocoded);
+        console.log(
+          `Geocoded "${entry.location}" -> [${geocoded[0]}, ${geocoded[1]}]`,
+        );
+      }
+    }
+    if (coords) {
+      entry.lng = coords[0];
+      entry.lat = coords[1];
     }
   }
 

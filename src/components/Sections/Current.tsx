@@ -1,51 +1,61 @@
-import Map from "@/components/ui/Map";
+import PlacesMap from "@/components/ui/PlacesMap";
+import photosData from "@/content/photos/photos.json";
+import { locationCoordinates, type Place } from "@/content/photos/locations";
+
+type RawPhoto = {
+  filename: string;
+  date: string;
+  location: string;
+  lng?: number;
+  lat?: number;
+};
+
+// Prefer coordinates stored on the photo (geocoded at sync time), then fall
+// back to the hardcoded lookup for older entries. Returns null if unknown.
+function coordsFor(photo: RawPhoto): [number, number] | null {
+  if (photo.lng != null && photo.lat != null) return [photo.lng, photo.lat];
+  return locationCoordinates[photo.location] ?? null;
+}
+
+function getPlaces(): Place[] {
+  const byLocation = new Map<string, Place>();
+
+  (photosData as RawPhoto[])
+    .filter((p) => p.location && coordsFor(p))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .forEach((photo) => {
+      const image = `/img/photos/${photo.filename}`;
+      const existing = byLocation.get(photo.location);
+      if (existing) {
+        existing.count += 1;
+        existing.photos.push({ image, date: photo.date });
+        return;
+      }
+      const [lng, lat] = coordsFor(photo)!;
+      byLocation.set(photo.location, {
+        location: photo.location,
+        lng,
+        lat,
+        image,
+        date: photo.date,
+        count: 1,
+        photos: [{ image, date: photo.date }],
+      });
+    });
+
+  return Array.from(byLocation.values());
+}
 
 export default function Current() {
+  const places = getPlaces();
+
   return (
     <>
-      <h1 className="mb-1 text-xl font-bold">Current</h1>
+      <h1 className="mb-1 text-xl font-bold">Places I&apos;ve Been</h1>
       <p className="mb-3 text-sm text-text-light-body dark:text-text-dark-body md:text-base">
-        I&apos;m currently on a co-op term in Vancouver. If you&apos;re around,
-        let&apos;s connect!
+        A map of places I&apos;ve been. Hover a pin to peek, click to see more.
       </p>
-      <div className="relative">
-        <Map lng={-123.1207} lat={49.2827} />
-        <div className="absolute bottom-4 left-4 flex items-center rounded-lg bg-neutral-100/75 px-4 py-1.5 backdrop-blur dark:bg-neutral-900/75 md:bottom-6 md:left-6">
-          <p className="text-primary text-sm font-medium">Vancouver, BC</p>
-        </div>
-      </div>
-
-      <div className="space-y-2 rounded-lg py-4">
-        {interestsData.map((interest) => (
-          <div
-            className="flex items-start sm:items-center"
-            key={interest.title}
-          >
-            <span className="mr-2 min-w-[80px] md:min-w-fit">
-              {interest.title}
-            </span>
-            <div className="hidden flex-grow border-t border-dashed border-text-light-body dark:border-text-dark-body sm:inline"></div>
-            <span className="ml-2 block text-left text-base text-text-light-body dark:text-text-dark-body sm:text-center">
-              {interest.content}
-            </span>
-          </div>
-        ))}
-      </div>
+      <PlacesMap places={places} />
     </>
   );
 }
-
-const interestsData = [
-  {
-    title: "Interests",
-    content: "Photography, Investing, Personal Finance",
-  },
-  {
-    title: "Learning",
-    content: "Tennis, Snowboarding, Design",
-  },
-  {
-    title: "Listening",
-    content: "The Design of Everyday Things, Motley Fool Money, Acquired",
-  },
-];
