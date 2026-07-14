@@ -1,7 +1,7 @@
 <div align="center">
     <div id="user-content-toc">
       <ul>
-        <summary><h1 style="display: inline-block; margin-bottom:0px">ericxie.ca</h1></summary>
+        <summary><h1 style="display: inline-block; margin-bottom:0px">ericxie.com</h1></summary>
       </ul>
     </div>
     <h3>Personal Website</h3>
@@ -14,7 +14,7 @@
     <br><br>
 </div>
 
-<img width="1488" alt="Screenshot 2024-05-04 at 9 58 56 PM" src="https://github.com/ericcxie/ericxie.ca/assets/66566975/be7e3e8d-e49e-42e9-bf3a-3c3e6ab06eae">
+<img width="1488" alt="Screenshot 2024-05-04 at 9 58 56 PM" src="https://github.com/ericcxie/ericxie.com/assets/66566975/be7e3e8d-e49e-42e9-bf3a-3c3e6ab06eae">
 
 ## Getting Started
 
