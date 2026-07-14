@@ -22,7 +22,7 @@ export default function Photos() {
         className="animate-in text-text-light-body dark:text-text-dark-body"
         style={{ "--index": 2 } as React.CSSProperties}
       >
-        📸 I like to capture the little moments in my life
+        I like to capture the little moments in my life
       </p>
       <div
         className="animate-in"

@@ -53,7 +53,7 @@ export default function Current() {
     <>
       <h1 className="mb-1 text-xl font-bold">Places I&apos;ve Been</h1>
       <p className="mb-3 text-sm text-text-light-body dark:text-text-dark-body md:text-base">
-        A map of places I&apos;ve been. Hover a pin to peek, click to see more.
+        Here&apos;s a map of some places I&apos;ve taken my fujifilm.
       </p>
       <PlacesMap places={places} />
     </>
