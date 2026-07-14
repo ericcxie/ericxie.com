@@ -16,16 +16,7 @@ export const cardItems = [
     image: "/img/projects/collaboracart.webp",
     link: "https://github.com/ericcxie/CollaboraCart",
   },
-  {
-    title: "Pomoduo",
-    tag: "Real time study room app",
-    description:
-      "A real time study room app. Study together with your friends using the Pomodoro Technique",
-    tools: ["Node.js", "Express.js", "Socket.io", "Firebase"],
-    image: "/img/projects/pomoduo.webp",
-    link: "https://github.com/ericcxie/pomoduo-timer",
-  },
-  {
+{
     title: "OptiWealth",
     tag: "Portfolio rebalancer",
     description:
