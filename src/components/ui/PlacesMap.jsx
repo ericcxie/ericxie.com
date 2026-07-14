@@ -20,6 +20,11 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
   const openPlace = useRef(setActivePlace);
   openPlace.current = setActivePlace;
 
+  // Spin controls, shared between the setup effect and the lightbox effect.
+  const spinRef = useRef(() => {});
+  const interactingRef = useRef(false);
+  const lightboxOpenRef = useRef(false);
+
   const { resolvedTheme } = useTheme();
   const mapTheme = resolvedTheme === "dark" ? "night" : "light";
 
@@ -28,7 +33,7 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      center: [10, 30],
+      center: [-100, 40],
       zoom,
       pitch,
       projection: "globe",
@@ -37,28 +42,41 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
 
     // Slowly spin the globe; pause on user interaction, resume after idle.
     const secondsPerRevolution = 120;
-    let userInteracting = false;
 
     const spinGlobe = () => {
-      if (!map.current || userInteracting || map.current.getZoom() > 4) return;
+      if (
+        !map.current ||
+        interactingRef.current ||
+        lightboxOpenRef.current ||
+        map.current.getZoom() > 4
+      )
+        return;
       const center = map.current.getCenter();
       center.lng -= 360 / secondsPerRevolution;
       map.current.easeTo({ center, duration: 1000, easing: (n) => n });
     };
+    spinRef.current = spinGlobe;
 
-    map.current.on("mousedown", () => {
-      userInteracting = true;
-    });
-    map.current.on("dragstart", () => {
-      userInteracting = true;
-    });
+    // Grab: mark interacting so the spin pauses. Mapbox interrupts the
+    // in-flight easeTo automatically — do NOT call map.stop() here, it
+    // cancels the drag gesture itself.
+    const startInteract = () => {
+      interactingRef.current = true;
+    };
+    ["mousedown", "dragstart", "touchstart"].forEach((evt) =>
+      map.current.on(evt, startInteract),
+    );
+
+    // The spin's own easeTo ends with `moveend`, which chains the next step.
+    // Only re-arm the spin from moveend when the user isn't interacting.
     map.current.on("moveend", () => {
-      // `moveend` fires after each eased spin step, chaining the animation.
-      spinGlobe();
+      if (!interactingRef.current) spinGlobe();
     });
+
+    // Release: resume spinning after the user lets go.
     ["mouseup", "touchend", "dragend"].forEach((evt) =>
       map.current.on(evt, () => {
-        userInteracting = false;
+        interactingRef.current = false;
         spinGlobe();
       }),
     );
@@ -124,6 +142,16 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
     if (!map.current || !map.current.isStyleLoaded()) return;
     map.current.setConfigProperty("basemap", "lightPreset", mapTheme);
   }, [mapTheme]);
+
+  // Pause the spin while the lightbox is open; resume when it closes.
+  useEffect(() => {
+    lightboxOpenRef.current = activePlace !== null;
+    if (activePlace) {
+      map.current?.stop();
+    } else {
+      spinRef.current();
+    }
+  }, [activePlace]);
 
   return (
     <>
