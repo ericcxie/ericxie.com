@@ -129,7 +129,7 @@ export default function Header() {
             onClick={() =>
               window.dispatchEvent(new Event("command-palette:toggle"))
             }
-            className="group flex h-8 w-8 items-center justify-center gap-1 rounded-lg border border-text-light-body text-text-light-body transition duration-500 hover:border-text-light-headerLight hover:text-text-light-headerLight dark:border-text-dark-headerDark dark:text-text-dark-headerDark dark:hover:border-text-dark-header dark:hover:text-text-dark-header md:w-auto md:px-2"
+            className="border-text-text-light-body group flex h-8 w-8 items-center justify-center gap-1 rounded-lg border text-text-light-body transition duration-500 hover:border-text-light-headerLight hover:text-text-light-headerLight dark:border-text-dark-headerDark dark:text-text-dark-headerDark dark:hover:border-text-dark-header dark:hover:text-text-dark-header md:w-auto md:px-2"
           >
             <MagnifyingGlassIcon className="h-5 w-5 md:hidden" />
             <kbd className="hidden h-5 w-5 items-center justify-center rounded bg-stone-200 dark:bg-stone-800/80 md:flex">

@@ -2,7 +2,6 @@ import Current from "@/components/Sections/Current";
 import Experiences from "@/components/Sections/Experiences";
 import LatestPosts from "@/components/Sections/LatestPosts";
 import Projects from "@/components/Sections/Projects";
-import { LinkPreview } from "@/components/ui/LinkPreview";
 
 import { Spotlight } from "@/components/ui/Spotlight";
 
@@ -27,15 +26,23 @@ export default function Home() {
           >
             I&apos;m a Computer Engineering student at the{" "}
             <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
-              <LinkPreview url="https://uwaterloo.ca/engineering/">
+              <a
+                href="https://uwaterloo.ca/engineering/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 University of Waterloo
-              </LinkPreview>
+              </a>
             </span>
             . Currently, I&apos;m a Software Engineer Intern at{" "}
             <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
-              <LinkPreview url="https://www.aboutamazon.com/">
+              <a
+                href="https://www.aboutamazon.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Amazon
-              </LinkPreview>
+              </a>
             </span>
             .
           </p>

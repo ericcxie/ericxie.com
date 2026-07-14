@@ -42,7 +42,7 @@ const interestsData = [
   },
   {
     title: "Learning",
-    content: "Snowboarding, open banking, design",
+    content: "Tennis, open banking, design",
   },
   {
     title: "Listening",
