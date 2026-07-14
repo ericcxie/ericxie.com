@@ -6,7 +6,9 @@ import { Fragment, useEffect, useRef, useState } from "react";
 
 import { Popover, Transition } from "@headlessui/react";
 import { Bars3Icon } from "@heroicons/react/20/solid";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import { Command } from "lucide-react";
 
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 
@@ -120,8 +122,26 @@ export default function Header() {
           })}
         </div>
 
-        <div className="ml-auto flex h-8 w-8 items-center justify-center md:ml-0">
-          <ThemeSwitcher />
+        <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <button
+            type="button"
+            aria-label="Open command menu"
+            onClick={() =>
+              window.dispatchEvent(new Event("command-palette:toggle"))
+            }
+            className="group flex h-8 w-8 items-center justify-center gap-1 rounded-lg border border-text-light-body text-text-light-body transition duration-500 hover:border-text-light-headerLight hover:text-text-light-headerLight dark:border-text-dark-headerDark dark:text-text-dark-headerDark dark:hover:border-text-dark-header dark:hover:text-text-dark-header md:w-auto md:px-2"
+          >
+            <MagnifyingGlassIcon className="h-5 w-5 md:hidden" />
+            <kbd className="hidden h-5 w-5 items-center justify-center rounded bg-stone-200 dark:bg-stone-800/80 md:flex">
+              <Command className="h-3 w-3" strokeWidth={2.5} />
+            </kbd>
+            <kbd className="hidden h-5 w-5 items-center justify-center rounded bg-stone-200 text-xs font-medium dark:bg-stone-800/80 md:flex">
+              K
+            </kbd>
+          </button>
+          <div className="flex h-8 w-8 items-center justify-center">
+            <ThemeSwitcher />
+          </div>
         </div>
 
         {/* Mobile menu bar */}

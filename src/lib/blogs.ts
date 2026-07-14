@@ -23,6 +23,7 @@ const getSortedPosts = (): PostItem[] => {
       title: matterResult.data.title,
       date: matterResult.data.date,
       category: matterResult.data.category,
+      readingTime: calculateReadingTime(matterResult.content),
     };
   });
 
@@ -39,6 +40,8 @@ const getSortedPosts = (): PostItem[] => {
     }
   });
 };
+
+export const getAllPosts = (): PostItem[] => getSortedPosts();
 
 export const getCategorizedPosts = (): Record<string, PostItem[]> => {
   const sortedPosts = getSortedPosts();
