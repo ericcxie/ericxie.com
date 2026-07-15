@@ -19,7 +19,7 @@ import {
   SunIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { Calculator, CalendarClock } from "lucide-react";
+import { Boxes, Calculator, CalendarClock } from "lucide-react";
 import moment from "moment";
 import { useTheme } from "next-themes";
 import { FaXTwitter } from "react-icons/fa6";
@@ -231,6 +231,21 @@ export default function CommandPalette({
         keywords: ["tweet", "twitter"],
         icon: <FaXTwitter className="h-5 w-5" />,
         perform: openExternal("https://x.com/ericxxie"),
+      },
+      {
+        id: "immersive-mode",
+        label: "Immersive mode",
+        section: "General",
+        keywords: ["3d", "explore", "world", "game", "walk", "wander"],
+        icon: <Boxes className="h-5 w-5" />,
+        perform: () => {
+          close();
+          // Defer so the palette's exit animation + scroll-unlock settle first.
+          setTimeout(
+            () => window.dispatchEvent(new Event("immersive:enter")),
+            80,
+          );
+        },
       },
       {
         id: "toggle-theme",
