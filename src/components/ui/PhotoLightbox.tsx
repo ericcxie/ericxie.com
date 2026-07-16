@@ -66,6 +66,18 @@ export default function PhotoLightbox({
 
   const photo = photos?.[index];
 
+  // Warm the adjacent images so next/prev navigation is instant. These render
+  // at the same size the lightbox uses, so Next.js optimizes the exact variant
+  // we'll ask for on navigation and the browser has it cached.
+  const neighbors =
+    photos && count > 1
+      ? Array.from(
+          new Set([(index + 1) % count, (index - 1 + count) % count]),
+        )
+          .filter((i) => i !== index)
+          .map((i) => photos[i])
+      : [];
+
   return createPortal(
     <AnimatePresence>
       {photos && photo && (
@@ -78,6 +90,21 @@ export default function PhotoLightbox({
           onClick={onClose}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+
+          {/* Hidden preloaders warm the adjacent photos for instant navigation. */}
+          <div aria-hidden className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0">
+            {neighbors.map((n) => (
+              <Image
+                key={n.image}
+                src={n.image}
+                alt=""
+                width={1400}
+                height={1400}
+                sizes="(max-width: 768px) 100vw, 896px"
+                priority
+              />
+            ))}
+          </div>
 
           {/* Close */}
           <button
