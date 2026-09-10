@@ -34,7 +34,7 @@ export default function Home() {
                 University of Waterloo
               </a>
             </span>
-            . Currently, I&apos;m a Software Engineer Intern at{" "}
+            . Previously, I was a Software Engineer Intern at{" "}
             <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
               <a
                 href="https://www.aboutamazon.com/"
