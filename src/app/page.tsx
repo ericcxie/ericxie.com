@@ -6,6 +6,9 @@ import EmailCopyLink from "@/components/EmailCopyLink";
 
 import { Spotlight } from "@/components/ui/Spotlight";
 
+const contactLink =
+  "cursor-pointer bg-transparent p-0 text-text-light-body transition-colors hover:text-text-light-header dark:text-text-dark-headerDark dark:hover:text-white";
+
 export default function Home() {
   return (
     <main className="flex flex-col gap-10">
@@ -20,61 +23,42 @@ export default function Home() {
         >
           Eric Xie
         </h1>
-        <div className="mt-4 space-y-1">
-          <p
-            className="max-w-2xl animate-in text-sm text-text-light-body dark:text-text-dark-body md:text-base"
-            style={{ "--index": 2 } as React.CSSProperties}
+        <p
+          className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-body dark:text-text-dark-body md:text-base"
+          style={{ "--index": 2 } as React.CSSProperties}
+        >
+          I currently study Computer Engineering at the University of
+          Waterloo. I&apos;ve previously worked at Amazon, Gem and Shopify, and I&apos;m
+          currently seeking 2027 new grad opportunities.
+        </p>
+        <p
+          className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-body dark:text-text-dark-body md:text-base"
+          style={{ "--index": 3 } as React.CSSProperties}
+        >
+          If you&apos;re building something interesting or just want to chat,
+          feel free to reach out!
+        </p>
+        <div
+          className="mt-4 flex animate-in gap-5 text-sm md:text-base"
+          style={{ "--index": 4 } as React.CSSProperties}
+        >
+          <EmailCopyLink label="Email" className={contactLink} />
+          <a
+            href="https://www.linkedin.com/in/ericcxie/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={contactLink}
           >
-            I&apos;m a Computer Engineering student at the{" "}
-            <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
-              <a
-                href="https://uwaterloo.ca/engineering/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                University of Waterloo
-              </a>
-            </span>
-            . Previously, I was a Software Engineer Intern at{" "}
-            <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
-              <a
-                href="https://www.aboutamazon.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Amazon
-              </a>
-            </span>
-            .
-          </p>
-        </div>
-        <div className="mt-4 space-y-1">
-          <p
-            className="max-w-xl animate-in text-sm text-text-light-body dark:text-text-dark-body md:text-base"
-            style={{ "--index": 3 } as React.CSSProperties}
+            LinkedIn
+          </a>
+          <a
+            href="https://x.com/ericxxie"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={contactLink}
           >
-            I believe in creating software that is not only functional but also
-            clean, beautiful, and enjoyable to use. Let&apos;s build something
-            together that inspires.
-          </p>
-        </div>
-        <div className="mt-4 space-y-1">
-          <p
-            className="max-w-lg animate-in text-sm text-text-light-body dark:text-text-dark-body md:text-base"
-            style={{ "--index": 4 } as React.CSSProperties}
-          >
-            You can reach me on{" "}
-            <span className="border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500">
-              <a
-                href="https://www.linkedin.com/in/ericcxie/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                LinkedIn
-              </a>
-            </span>{" "}
-            or at <EmailCopyLink />.
-          </p>
+            X
+          </a>
         </div>
       </div>
       <div

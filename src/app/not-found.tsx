@@ -1,4 +1,5 @@
 import Link from "@/components/ui/Link";
+import { NotFoundFigure } from "@/components/ui/NotFoundFigure";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
 
 const Custom404 = (): JSX.Element => (
   <div className="flex flex-col gap-2">
-    <h1 className="text-primary text-3xl font-bold tracking-tight">404</h1>
+    <NotFoundFigure />
+    <h1 className="text-primary mt-6 text-3xl font-bold tracking-tight">404</h1>
     <p className="text-secondary">
       Uh oh! Looks like this page doesn’t exist...
     </p>

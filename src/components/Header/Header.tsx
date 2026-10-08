@@ -15,10 +15,14 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import local from "next/font/local";
 
 const links = [
-  { label: "About", href: "/" },
-  { label: "Blog", href: "/blog" },
+  { label: "About", href: "/", mobileOnly: true },
+  { label: "Projects", href: "/projects" },
+  { label: "Writing", href: "/writing" },
   { label: "Photos", href: "/photos" },
 ];
+
+// The signature already links home on desktop
+const desktopLinks = links.filter((link) => !link.mobileOnly);
 
 const autograf = local({
   src: [{ path: "../../../public/fonts/Autograf.ttf", weight: "400" }],
@@ -78,7 +82,7 @@ export default function Header() {
           <h1 className={`${autograf.className} text-3xl`}>Eric</h1>
         </Link>
         <div className="hidden gap-2 md:flex">
-          {links.map((item) => {
+          {desktopLinks.map((item) => {
             const isActive = item.href === pathname;
 
             return (
@@ -129,7 +133,7 @@ export default function Header() {
             onClick={() =>
               window.dispatchEvent(new Event("command-palette:toggle"))
             }
-            className="border-text-text-light-body group flex h-8 w-8 items-center justify-center gap-1 rounded-lg border text-text-light-body transition duration-500 hover:border-text-light-headerLight hover:text-text-light-headerLight dark:border-text-dark-headerDark dark:text-text-dark-headerDark dark:hover:border-text-dark-header dark:hover:text-text-dark-header md:w-auto md:px-2"
+            className="group flex h-8 w-8 items-center justify-center gap-1 rounded-lg border border-neutral-200 text-text-light-body transition duration-500 hover:border-neutral-400 hover:text-text-light-headerLight dark:border-neutral-800 dark:text-text-dark-headerDark dark:hover:border-neutral-600 dark:hover:text-text-dark-header md:w-auto md:px-2"
           >
             <MagnifyingGlassIcon className="h-5 w-5 md:hidden" />
             <kbd className="hidden h-5 w-5 items-center justify-center rounded bg-stone-200 dark:bg-stone-800/80 md:flex">

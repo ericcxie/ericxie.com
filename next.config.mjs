@@ -5,6 +5,13 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_TIMESTAMP: buildTime,
   },
+  // The blog moved to /writing; keep old (and search-indexed) links working
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/writing", permanent: true },
+      { source: "/blog/:path*", destination: "/writing/:path*", permanent: true },
+    ];
+  },
   images: {
     remotePatterns: [
       {

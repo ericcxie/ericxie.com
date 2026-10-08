@@ -29,36 +29,49 @@
 }
 
 .post {
-  @apply flex flex-col gap-5 tracking-wide;
+  @apply flex flex-col gap-4 text-[15px] leading-relaxed;
 }
 
 .post > h1 {
-  @apply font-akkurat text-2xl tracking-tight;
-  @apply font-bold;
+  @apply mt-4 text-lg font-semibold tracking-tight text-text-light-header dark:text-white;
 }
 
-.post > h2 {
-  @apply font-akkurat text-xl tracking-tight;
+.post > h2,
+.post > h3 {
+  @apply mt-2 text-base font-semibold tracking-tight text-text-light-header dark:text-white;
 }
 
 .post a {
-  @apply border-b-[2px] border-neutral-600 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500;
+  @apply underline decoration-neutral-400 underline-offset-4 transition-colors hover:decoration-current dark:decoration-neutral-600;
 }
 
 .post > p {
-  @apply font-akkurat text-text-light-headerLight dark:text-text-dark-body;
+  @apply text-text-light-headerLight dark:text-text-dark-body;
 }
 
 .post code {
-  @apply rounded bg-neutral-200 px-1 text-red-600 dark:bg-neutral-800 dark:text-red-400;
+  @apply rounded bg-neutral-200/70 px-1 text-[0.9em] text-text-light-headerLight dark:bg-neutral-800 dark:text-text-dark-body;
+}
+
+.post > ul,
+.post > ol {
+  @apply ml-5 flex flex-col gap-1.5 text-text-light-headerLight dark:text-text-dark-body;
 }
 
 .post > ul {
-  @apply mx-10 flex list-disc flex-col gap-2 font-akkurat;
+  @apply list-disc;
+}
+
+.post > ol {
+  @apply list-decimal;
 }
 
 .post > pre {
-  @apply overflow-scroll bg-neutral-950 p-5 text-neutral-50;
+  @apply overflow-x-auto rounded-xl border border-neutral-200 bg-neutral-100 p-4 text-sm dark:border-neutral-800 dark:bg-[#141414];
+}
+
+.post > pre code {
+  @apply bg-transparent p-0;
 }
 
 .post img {
@@ -66,7 +79,7 @@
 }
 
 .post > blockquote {
-  @apply border-l-2 border-neutral-600 border-opacity-40 pl-5 font-akkurat italic;
+  @apply border-l-2 border-neutral-300 pl-4 text-text-light-body dark:border-neutral-700 dark:text-text-dark-headerDark;
 }
 
 .post > p > img {
@@ -78,6 +91,14 @@
   @apply block w-full max-w-full rounded-2xl border-0;
   aspect-ratio: 16 / 9;
   height: auto;
+}
+
+.project-prose p + p {
+  @apply mt-3;
+}
+
+.project-prose a {
+  @apply underline decoration-neutral-400 underline-offset-4 transition-colors hover:decoration-current dark:decoration-neutral-600;
 }
 
 .mapboxgl-control-container {

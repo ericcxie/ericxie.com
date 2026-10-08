@@ -16,6 +16,7 @@ import {
   DocumentTextIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
+  RectangleStackIcon,
   SunIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
@@ -26,7 +27,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import { IoLogoGithub, IoLogoLinkedin } from "react-icons/io5";
 
 import { cn } from "@/utils/cn";
-import type { PostItem } from "@/types";
+import type { PostItem, ProjectItem } from "@/types";
 
 /**
  * Safely evaluate a basic arithmetic expression (+, -, *, /, %, ^, parens)
@@ -136,8 +137,10 @@ type CommandItem = {
 
 export default function CommandPalette({
   posts = [],
+  projects = [],
 }: {
   posts?: PostItem[];
+  projects?: ProjectItem[];
 }) {
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
@@ -184,12 +187,20 @@ export default function CommandPalette({
         perform: go("/"),
       },
       {
-        id: "nav-blog",
-        label: "Blog",
+        id: "nav-projects",
+        label: "Projects",
         section: "Navigation",
-        keywords: ["posts", "writing", "articles"],
+        keywords: ["work", "portfolio"],
+        icon: <RectangleStackIcon className="h-5 w-5" />,
+        perform: go("/projects"),
+      },
+      {
+        id: "nav-blog",
+        label: "Writing",
+        section: "Navigation",
+        keywords: ["blog", "posts", "articles"],
         icon: <DocumentTextIcon className="h-5 w-5" />,
-        perform: go("/blog"),
+        perform: go("/writing"),
       },
       {
         id: "nav-photos",
@@ -199,14 +210,23 @@ export default function CommandPalette({
         icon: <PhotoIcon className="h-5 w-5" />,
         perform: go("/photos"),
       },
+      ...projects.map<CommandItem>((project) => ({
+        id: `project-${project.slug}`,
+        label: project.title,
+        section: "Projects",
+        keywords: [project.company, ...project.tools],
+        icon: <RectangleStackIcon className="h-5 w-5" />,
+        subtitle: project.company,
+        perform: go(`/projects/${project.slug}`),
+      })),
       ...posts.map<CommandItem>((post) => ({
         id: `post-${post.id}`,
         label: post.title,
-        section: "Blog Posts",
+        section: "Writing",
         keywords: [post.category],
         icon: <DocumentTextIcon className="h-5 w-5" />,
         subtitle: moment(post.date, "MM-DD-YYYY").format("MMM D, YYYY"),
-        perform: go(`/blog/${post.id}`),
+        perform: go(`/writing/${post.id}`),
       })),
       {
         id: "social-linkedin",
@@ -252,7 +272,7 @@ export default function CommandPalette({
         },
       },
     ];
-  }, [router, resolvedTheme, setTheme, close, posts]);
+  }, [router, resolvedTheme, setTheme, close, posts, projects]);
 
   // Computed, query-driven results (calculator, date) — Raycast style.
   const dynamicItems = useMemo<CommandItem[]>(() => {

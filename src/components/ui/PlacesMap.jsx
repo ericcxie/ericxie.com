@@ -28,6 +28,19 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
   const { resolvedTheme } = useTheme();
   const mapTheme = resolvedTheme === "dark" ? "night" : "light";
 
+  // The space around the globe matches the page background, with no stars
+  const applyTheme = (m, theme) => {
+    const dark = theme === "night";
+    m.setConfigProperty("basemap", "lightPreset", theme);
+    m.setFog({
+      color: dark ? "#1a1a1a" : "#f2f2f2",
+      "high-color": dark ? "#141414" : "#ececec",
+      "space-color": dark ? "#0C0C0C" : "#FCFCFC",
+      "horizon-blend": 0.04,
+      "star-intensity": 0,
+    });
+  };
+
   useEffect(() => {
     if (map.current) return;
 
@@ -87,7 +100,7 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
       `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
 
     map.current.on("style.load", () => {
-      map.current.setConfigProperty("basemap", "lightPreset", mapTheme);
+      applyTheme(map.current, mapTheme);
       spinGlobe();
 
       places.forEach((place) => {
@@ -140,7 +153,7 @@ export default function PlacesMap({ places, zoom = 1.4, pitch = 20 }) {
   // Keep the basemap in sync with the site theme.
   useEffect(() => {
     if (!map.current || !map.current.isStyleLoaded()) return;
-    map.current.setConfigProperty("basemap", "lightPreset", mapTheme);
+    applyTheme(map.current, mapTheme);
   }, [mapTheme]);
 
   // Pause the spin while the lightbox is open; resume when it closes.
