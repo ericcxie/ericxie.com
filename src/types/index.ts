@@ -10,7 +10,9 @@ export type ProjectFigure =
   | "branches"
   | "slow"
   | "laptop"
-  | "exploded";
+  | "exploded"
+  | "plot"
+  | "riffle";
 
 export type ProjectItem = {
   slug: string;

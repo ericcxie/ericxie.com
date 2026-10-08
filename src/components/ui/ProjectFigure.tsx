@@ -5,6 +5,8 @@ import {
   Branches,
   Exploded,
   Laptop,
+  Plot,
+  Riffle,
   Slow,
 } from "@lucasmarkes/hairline/react";
 import type { ProjectFigure as FigureName } from "@/types";
@@ -15,6 +17,8 @@ const figures = {
   slow: Slow,
   laptop: Laptop,
   exploded: Exploded,
+  plot: Plot,
+  riffle: Riffle,
 } satisfies Record<FigureName, unknown>;
 
 // Some figures are framed for their most open pose and sit off-centre at rest.
