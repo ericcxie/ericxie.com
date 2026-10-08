@@ -1,6 +1,6 @@
-import PostList from "@/app/blog/components/PostList";
+import PostList from "@/app/writing/components/PostList";
 import { getCategorizedPosts } from "@/lib/blogs";
-import { ArrowUpRightIcon } from "@heroicons/react/20/solid";
+import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 
 export default function LatestPosts() {
@@ -8,16 +8,16 @@ export default function LatestPosts() {
 
   return (
     <div>
-      <Link
-        className="mb-1 flex items-center gap-1 text-xl font-bold"
-        href="/blog"
-      >
-        Latest Posts
-        <ArrowUpRightIcon className="h-6 w-6 text-text-dark-headerDark transition-all hover:text-text-dark-body" />
-      </Link>
-      <p className="mb-4 max-w-lg text-sm leading-relaxed text-text-light-body dark:text-text-dark-body md:text-base">
-        I occasionally write about things that I find interesting.
-      </p>
+      <div className="mb-4 flex items-baseline justify-between">
+        <h1 className="text-xl font-bold">Writing</h1>
+        <Link
+          href="/writing"
+          className="group flex items-center gap-1 text-sm text-text-light-body transition-colors hover:text-text-light-headerLight dark:text-text-dark-headerDark dark:hover:text-text-dark-header"
+        >
+          View all
+          <ArrowRightIcon className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </Link>
+      </div>
       <PostList posts={posts} />
     </div>
   );

@@ -17,7 +17,7 @@ const Post = ({ category, posts }: Props) => {
           <div className="w-24 flex-shrink-0 text-sm text-text-light-body dark:text-text-dark-headerDark md:w-32 md:text-base">
             {moment(post.date, "MM-DD-YYYY").format("MMM DD, YYYY")}
           </div>
-          <Link href={`/blog/${post.id}`} className="block hover:underline">
+          <Link href={`/writing/${post.id}`} className="block hover:underline">
             {post.title}
           </Link>
         </div>

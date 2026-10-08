@@ -16,7 +16,7 @@ export default function ThemeSwitcher() {
   if (!mounted) {
     // Reserve the button's footprint so it doesn't pop in on hydration.
     return (
-      <div className="border-text-text-light-body dark:border-text-dark-headerDark h-8 w-8 rounded-lg border" />
+      <div className="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-800" />
     );
   }
 
@@ -33,7 +33,7 @@ export default function ThemeSwitcher() {
       <button
         onClick={toggleTheme}
         className={clsx(
-          "border-text-text-light-body group-hover:border-text-light-headerLight dark:border-text-dark-headerDark relative flex h-8 w-8 cursor-default items-center justify-center rounded-lg border transition duration-500 dark:group-hover:border-text-dark-header",
+          "relative flex h-8 w-8 cursor-default items-center justify-center rounded-lg border border-neutral-200 transition duration-500 group-hover:border-neutral-400 dark:border-neutral-800 dark:group-hover:border-neutral-600",
         )}
       >
         {resolvedTheme === "dark" ? (

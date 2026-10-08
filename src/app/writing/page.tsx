@@ -9,11 +9,17 @@ export default function Blog() {
         className="animate-in font-system text-3xl font-bold"
         style={{ "--index": 1 } as React.CSSProperties}
       >
-        Blog
+        Writing
       </h1>
-      <div
-        className="animate-in"
+      <p
+        className="max-w-xl animate-in text-sm text-text-light-body dark:text-text-dark-body md:text-base"
         style={{ "--index": 2 } as React.CSSProperties}
+      >
+        I occasionally write about things that I find interesting.
+      </p>
+      <div
+        className="mt-4 animate-in"
+        style={{ "--index": 3 } as React.CSSProperties}
       >
         <PostList posts={posts} />
       </div>

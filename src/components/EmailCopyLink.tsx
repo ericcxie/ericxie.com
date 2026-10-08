@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from "react";
 
 const EMAIL = "pexie@uwaterloo.ca";
 
-export default function EmailCopyLink() {
+// Shows the address by default; pass label/className to render it as a plain link
+export default function EmailCopyLink({
+  label = EMAIL,
+  className = "cursor-pointer border-b-[2px] border-neutral-600 bg-transparent p-0 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500",
+}: {
+  label?: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -48,11 +55,11 @@ export default function EmailCopyLink() {
       <button
         type="button"
         onClick={copyEmail}
-        className="cursor-pointer border-b-[2px] border-neutral-600 bg-transparent p-0 transition duration-500 hover:border-neutral-800 dark:hover:border-neutral-500"
+        className={className}
         aria-label={`Copy ${EMAIL} to clipboard`}
         title="Copy email address"
       >
-        {EMAIL}
+        {label}
       </button>
       <span
         role="status"
