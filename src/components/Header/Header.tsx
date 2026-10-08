@@ -15,7 +15,6 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import local from "next/font/local";
 
 const links = [
-  { label: "About", href: "/", mobileOnly: true },
   { label: "Projects", href: "/projects" },
   { label: "Writing", href: "/writing" },
   { label: "Photos", href: "/photos" },
