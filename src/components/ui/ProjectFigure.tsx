@@ -3,16 +3,16 @@
 import { useState } from "react";
 import {
   Branches,
-  Elevator,
   Exploded,
   Laptop,
+  Slow,
 } from "@lucasmarkes/hairline/react";
 import type { ProjectFigure as FigureName } from "@/types";
 import { cn } from "@/utils/cn";
 
 const figures = {
   branches: Branches,
-  elevator: Elevator,
+  slow: Slow,
   laptop: Laptop,
   exploded: Exploded,
 } satisfies Record<FigureName, unknown>;

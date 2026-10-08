@@ -8,7 +8,7 @@ export type PostItem = {
 
 export type ProjectFigure =
   | "branches"
-  | "elevator"
+  | "slow"
   | "laptop"
   | "exploded";
 

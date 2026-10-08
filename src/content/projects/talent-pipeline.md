@@ -5,7 +5,7 @@ role: "Software Engineer Intern"
 timeline: "Jan – Apr 2026"
 description: "Redesigning the talent pipeline recruiters use to track applicants, and helping out across Gem's ATS along the way."
 tools: [] # TODO: stack
-figure: "elevator"
+figure: "slow"
 link: "https://www.gem.com/product/ats"
 order: 2
 featured: true
