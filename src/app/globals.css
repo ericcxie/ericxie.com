@@ -101,11 +101,9 @@
   @apply underline decoration-neutral-400 underline-offset-4 transition-colors hover:decoration-current dark:decoration-neutral-600;
 }
 
-.mapboxgl-control-container {
-  display: none;
-}
-
-/* Photo-thumbnail pins for the "Places I've Been" map */
+/* Photo-thumbnail pins for the "Places I've Been" globe. The globe moves them
+   with an inline transform every frame, so hover uses the separate `scale`
+   property, and transform itself is never transitioned. */
 .place-marker {
   width: 44px;
   height: 44px;
@@ -117,12 +115,12 @@
   cursor: pointer;
   padding: 0;
   transition:
-    transform 0.25s ease,
+    scale 0.25s ease,
     box-shadow 0.25s ease;
 }
 
 .place-marker:hover {
-  transform: scale(1.15);
+  scale: 1.15;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
   z-index: 2;
 }
@@ -141,18 +139,6 @@
   line-height: 18px;
   text-align: center;
   border: 1.5px solid rgba(255, 255, 255, 0.95);
-}
-
-.place-popup .mapboxgl-popup-content {
-  padding: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: transparent;
-  box-shadow: none;
-}
-
-.place-popup .mapboxgl-popup-tip {
-  display: none;
 }
 
 .place-popup__inner {

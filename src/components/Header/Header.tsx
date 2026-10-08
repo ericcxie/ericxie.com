@@ -67,7 +67,7 @@ export default function Header() {
 
   return (
     <header
-      className={`duration-400 sticky top-0 z-50 transition-all md:mt-6${
+      className={`duration-400 sticky top-0 z-50 transition-all md:mt-6 ${
         isScrolled
           ? "bg-background-light/80 backdrop-blur-lg dark:bg-background-dark/80"
           : ""
@@ -108,6 +108,11 @@ export default function Header() {
                   <motion.div
                     className="absolute bottom-0 left-0 -z-10 h-full rounded-md bg-stone-200 dark:bg-stone-800/80"
                     layoutId="navbar"
+                    // Only re-measure when the hovered link changes. The header
+                    // is sticky, so a re-render after navigating (which scrolls
+                    // to the top) would otherwise read as the highlight moving
+                    // and make it spring back into place.
+                    layoutDependency={hoveredPath}
                     aria-hidden="true"
                     style={{
                       width: "100%",

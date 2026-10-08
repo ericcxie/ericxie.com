@@ -1,8 +1,25 @@
 import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
-import { getPostData } from "@/lib/blogs";
+import type { Metadata } from "next";
+import { getAllPosts, getPostData } from "@/lib/blogs";
 
-const Post = async ({ params }: { params: { slug: string } }) => {
+type Params = { params: { slug: string } };
+
+// Posts are pre-built at deploy; an unknown slug is a 404 rather than a crash
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return getAllPosts()
+    .filter((post) => post.id !== ".gitkeep")
+    .map((post) => ({ slug: post.id }));
+}
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const post = await getPostData(params.slug);
+  return { title: `${post.title} · Eric Xie` };
+}
+
+const Post = async ({ params }: Params) => {
   const postData = await getPostData(params.slug);
 
   return (

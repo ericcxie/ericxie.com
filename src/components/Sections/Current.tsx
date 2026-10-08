@@ -1,4 +1,4 @@
-import PlacesMap from "@/components/ui/PlacesMap";
+import PlacesGlobe from "@/components/ui/PlacesGlobe";
 import photosData from "@/content/photos/photos.json";
 import { locationCoordinates, type Place } from "@/content/photos/locations";
 
@@ -55,7 +55,7 @@ export default function Current() {
       <p className="mb-3 text-sm text-text-light-body dark:text-text-dark-body md:text-base">
         Here&apos;s a map of some places I&apos;ve taken my camera.
       </p>
-      <PlacesMap places={places} />
+      <PlacesGlobe places={places} />
     </>
   );
 }

@@ -21,13 +21,38 @@ import {
   UserIcon,
 } from "@heroicons/react/24/outline";
 import { Calculator, CalendarClock } from "lucide-react";
-import moment from "moment";
 import { useTheme } from "next-themes";
 import { FaXTwitter } from "react-icons/fa6";
 import { IoLogoGithub, IoLogoLinkedin } from "react-icons/io5";
 
 import { cn } from "@/utils/cn";
 import type { PostItem, ProjectItem } from "@/types";
+
+// Post dates are stored as "MM-DD-YYYY"; shown as "May 15, 2026"
+const formatPostDate = (date: string) => {
+  const [month, day, year] = date.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+// e.g. "Thursday, October 8, 2026 · 3:42 PM"
+const formatNow = () => {
+  const now = new Date();
+  const date = now.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${date} · ${time}`;
+};
 
 /**
  * Safely evaluate a basic arithmetic expression (+, -, *, /, %, ^, parens)
@@ -225,7 +250,7 @@ export default function CommandPalette({
         section: "Writing",
         keywords: [post.category],
         icon: <DocumentTextIcon className="h-5 w-5" />,
-        subtitle: moment(post.date, "MM-DD-YYYY").format("MMM D, YYYY"),
+        subtitle: formatPostDate(post.date),
         perform: go(`/writing/${post.id}`),
       })),
       {
@@ -294,7 +319,7 @@ export default function CommandPalette({
     }
 
     if (/^(date|time|now|today)$/i.test(q)) {
-      const value = moment().format("dddd, MMMM D, YYYY · h:mm A");
+      const value = formatNow();
       results.push({
         id: "date",
         label: value,

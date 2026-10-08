@@ -6,14 +6,14 @@ timeline: "Jan – Aug 2025"
 description: "Isolated paper-trading ledgers that let every trading algorithm be forward tested on live prices."
 tools: ["Flask", "SQLAlchemy", "PostgreSQL", "Docker"]
 figure: "plot"
-link: "https://watstreet.netlify.app/"
+link: "https://github.com/Wat-Street/ledger-instances"
 order: 5
 featured: true
 ---
 
 ## Background
 
-Wat Street is a design team at Waterloo where students build and test their own trading algorithms. A strategy can look great in a backtest and still fall apart once it meets new data, so before trusting one, you want to forward test it: let it trade on live prices as they come in and see how it actually holds up. I joined as a backend developer to build that.
+Wat Street is a quantitative finance design team at Waterloo where students build and test their own trading algorithms. A strategy can look great in a backtest and still fall apart once it meets new data, so before trusting one, you want to forward test it: let it trade on live prices as they come in and see how it actually holds up. I joined as a backend developer to build that.
 
 ## Building it
 
