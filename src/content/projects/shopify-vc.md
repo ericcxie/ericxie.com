@@ -14,7 +14,7 @@ featured: true
 
 ## Background
 
-At Shopify I was on the Creative team. We were technically part of marketing, the people behind things like Shopify x MrBeast and the Black Friday globe, and most of our engineers were design engineers who build those polished one-off sites. I'll admit I was a little disappointed at first, since I'd been hoping for backend work, but there turned out to be a lot to learn.
+At Shopify I was on the Creative team. We were part of the branding team, the people behind things like Shopify x MrBeast and the Black Friday globe, and most of our engineers were design engineers who build those polished one-off sites. I'll admit I was a little disappointed at first, since I'd been hoping for backend work, but there turned out to be a lot to learn.
 
 ## Building it
 

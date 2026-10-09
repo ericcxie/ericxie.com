@@ -15,14 +15,10 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import local from "next/font/local";
 
 const links = [
-  { label: "About", href: "/", mobileOnly: true },
   { label: "Projects", href: "/projects" },
   { label: "Writing", href: "/writing" },
   { label: "Photos", href: "/photos" },
 ];
-
-// The signature already links home on desktop
-const desktopLinks = links.filter((link) => !link.mobileOnly);
 
 const autograf = local({
   src: [{ path: "../../../public/fonts/Autograf.ttf", weight: "400" }],
@@ -82,7 +78,7 @@ export default function Header() {
           <h1 className={`${autograf.className} text-3xl`}>Eric</h1>
         </Link>
         <div className="hidden gap-2 md:flex">
-          {desktopLinks.map((item) => {
+          {links.map((item) => {
             const isActive = item.href === pathname;
 
             return (
