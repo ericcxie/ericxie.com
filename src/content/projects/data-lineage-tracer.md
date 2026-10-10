@@ -18,6 +18,6 @@ My team at Amazon owns a lot of tax data that other services depend on. That's f
 
 I built a tracer that finds everywhere a field is used and what it's used for. The tricky part is that a lot of services copy our fields into their own models under new names, and every team does it differently. So instead of writing a rule for each pattern, an LLM spots the renames and works out whether each use filters, displays, calculates or saves the field. If a service saves it, the tracer follows it to whoever reads that data next.
 
-## What's next
+## Looking back
 
-If I kept working on it, I'd add a human in the loop, since the LLM won't always get it right. When the tracer flags something it isn't sure about, or gets a use wrong, someone could review it and fix the label. Those corrections would go into a knowledge base the model learns from, so the tracer gets more accurate the more it's used.
+My team had known about this problem for years, but there was never a real way to solve it. Every team does things a little differently, and no set of rules could keep up with that. LLMs are really good at handling that kind of ambiguity, which is what finally made this possible. It feels like a really exciting time, where problems we used to just live with are suddenly solvable!

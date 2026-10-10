@@ -28,8 +28,7 @@ export default function Home() {
           style={{ "--index": 2 } as React.CSSProperties}
         >
           I currently study Computer Engineering at the University of
-          Waterloo. I&apos;ve previously worked at Amazon, Gem and Shopify, and I&apos;m
-          currently seeking 2027 new grad opportunities.
+          Waterloo. I&apos;ve previously worked at Amazon, Gem and Shopify.
         </p>
         <p
           className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-body dark:text-text-dark-body md:text-base"

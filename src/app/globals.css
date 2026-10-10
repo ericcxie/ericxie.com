@@ -14,13 +14,15 @@
   }
 }
 
-@media (hover: hover) {
-  .animated-list:hover li {
-    opacity: 0.5;
-  }
+.animated-list li {
+  transition: opacity 200ms ease;
+}
 
-  .animated-list:hover li:hover {
-    opacity: 1;
+/* Dim the other rows only while one is hovered, so passing through the gap
+   between rows doesn't blink the whole list */
+@media (hover: hover) {
+  .animated-list:has(li:hover) li:not(:hover) {
+    opacity: 0.5;
   }
 }
 
@@ -102,11 +104,14 @@
 }
 
 /* Photo-thumbnail pins for the "Places I've Been" globe. The globe moves them
-   with an inline transform every frame, so hover uses the separate `scale`
-   property, and transform itself is never transitioned. */
+   with the `translate` property every frame, and hover uses `scale`. The
+   browser applies scale before translate, so it grows the pin in place; with
+   `transform` for the position, the scale would stretch the offset too and
+   the pin would slide on hover. The negative margin centres it on its point. */
 .place-marker {
   width: 44px;
   height: 44px;
+  margin: -22px;
   border-radius: 9999px;
   background-size: cover;
   background-position: center;

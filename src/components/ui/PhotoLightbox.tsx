@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
@@ -12,6 +12,15 @@ export type LightboxPhoto = {
   date?: string;
 };
 
+// Same `sizes` as the gallery grid, so the browser reuses the thumbnail it
+// already has and the photo shows the moment the lightbox opens.
+const THUMB_SIZES = "(min-width: 768px) 240px, 50vw";
+const FULL_SIZES = "(min-width: 768px) 640px, 92vw";
+const SWIPE_PX = 60;
+
+const navButton =
+  "absolute z-10 hidden h-10 w-10 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white md:flex";
+
 export default function PhotoLightbox({
   photos,
   startIndex = 0,
@@ -22,8 +31,11 @@ export default function PhotoLightbox({
   onClose: () => void;
 }) {
   const [index, setIndex] = useState(startIndex);
-  const [loaded, setLoaded] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Keyed by src rather than reset in an effect, so a cached image that loads
+  // before the effect would run can't leave the full-size layer hidden.
+  const [loaded, setLoaded] = useState<Record<string, boolean>>({});
+  const [aspects, setAspects] = useState<Record<string, number>>({});
 
   useEffect(() => setMounted(true), []);
 
@@ -31,9 +43,6 @@ export default function PhotoLightbox({
   useEffect(() => {
     if (photos) setIndex(startIndex);
   }, [photos, startIndex]);
-
-  // Reset the loaded state each time the shown photo changes.
-  useEffect(() => setLoaded(false), [index, photos]);
 
   const count = photos?.length ?? 0;
 
@@ -65,136 +74,162 @@ export default function PhotoLightbox({
   if (!mounted) return null;
 
   const photo = photos?.[index];
+  // Most photos are 2:3 portraits; the real ratio replaces this once the
+  // thumbnail reports its size.
+  const aspect = (photo && aspects[photo.image]) || 2 / 3;
 
-  // Warm the adjacent images so next/prev navigation is instant. These render
-  // at the same size the lightbox uses, so Next.js optimizes the exact variant
-  // we'll ask for on navigation and the browser has it cached.
+  // Warm the adjacent full-size images so next/prev is instant.
   const neighbors =
     photos && count > 1
-      ? Array.from(
-          new Set([(index + 1) % count, (index - 1 + count) % count]),
-        )
+      ? Array.from(new Set([(index + 1) % count, (index - 1 + count) % count]))
           .filter((i) => i !== index)
           .map((i) => photos[i])
       : [];
 
   return createPortal(
-    <AnimatePresence>
-      {photos && photo && (
-        <motion.div
-          className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          onClick={onClose}
-        >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-
-          {/* Hidden preloaders warm the adjacent photos for instant navigation. */}
-          <div aria-hidden className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0">
-            {neighbors.map((n) => (
-              <Image
-                key={n.image}
-                src={n.image}
-                alt=""
-                width={1400}
-                height={1400}
-                sizes="(max-width: 768px) 100vw, 896px"
-                priority
-              />
-            ))}
-          </div>
-
-          {/* Close */}
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20"
-          >
-            <X className="h-5 w-5" />
-          </button>
-
-          {/* Prev / Next */}
-          {count > 1 && (
-            <>
-              <button
-                aria-label="Previous photo"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  prev();
-                }}
-                className="absolute left-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20 md:left-6"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-              <button
-                aria-label="Next photo"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  next();
-                }}
-                className="absolute right-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20 md:right-6"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            </>
-          )}
-
-          {/* Image + caption */}
+    <MotionConfig reducedMotion="user">
+      <AnimatePresence>
+        {photos && photo && (
           <motion.div
-            key={photo.image}
-            className="relative z-[1] flex max-h-full max-w-4xl flex-col items-center"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[110] flex flex-col items-center justify-center p-4 md:p-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
           >
-            <div className="relative flex max-h-[80vh] min-h-[240px] min-w-[240px] items-center justify-center">
-              {/* Placeholder box + spinner shown until the image paints */}
-              {!loaded && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/5 ring-1 ring-inset ring-white/10 backdrop-blur-sm">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/25 border-t-white/80" />
-                </div>
-              )}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+
+            <div
+              aria-hidden
+              className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
+            >
+              {neighbors.map((n) => (
+                <Image
+                  key={n.image}
+                  src={n.image}
+                  alt=""
+                  width={1400}
+                  height={1400}
+                  sizes={FULL_SIZES}
+                  loading="eager"
+                />
+              ))}
+            </div>
+
+            <button
+              aria-label="Close"
+              onClick={onClose}
+              className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+
+            {count > 1 && (
+              <>
+                <button
+                  aria-label="Previous photo"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prev();
+                  }}
+                  className={`${navButton} left-6`}
+                >
+                  <ChevronLeft className="h-6 w-6" strokeWidth={1.5} />
+                </button>
+                <button
+                  aria-label="Next photo"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    next();
+                  }}
+                  className={`${navButton} right-6`}
+                >
+                  <ChevronRight className="h-6 w-6" strokeWidth={1.5} />
+                </button>
+              </>
+            )}
+
+            {/* The frame is sized up front, so nothing jumps while loading */}
+            <motion.div
+              className="relative z-[1] touch-pan-y overflow-hidden rounded-xl bg-white/5"
+              style={{
+                aspectRatio: aspect,
+                width: `min(100%, 56rem, calc(80dvh * ${aspect}))`,
+              }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 34 }}
+              drag={count > 1 ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, { offset }) => {
+                if (offset.x < -SWIPE_PX) next();
+                else if (offset.x > SWIPE_PX) prev();
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* The grid thumbnail shows straight away, then the full-size
+                  image fades in over it */}
               <Image
+                key={`thumb-${photo.image}`}
+                src={photo.image}
+                alt=""
+                fill
+                sizes={THUMB_SIZES}
+                draggable={false}
+                className="!m-0 object-cover"
+                onLoad={(e) => {
+                  const img = e.currentTarget;
+                  const src = photo.image;
+                  if (img.naturalWidth && img.naturalHeight)
+                    setAspects((a) => ({
+                      ...a,
+                      [src]: img.naturalWidth / img.naturalHeight,
+                    }));
+                }}
+              />
+              <Image
+                key={photo.image}
                 src={photo.image}
                 alt={photo.location ?? "Photo"}
-                width={1400}
-                height={1400}
-                sizes="(max-width: 768px) 100vw, 896px"
-                onLoad={() => setLoaded(true)}
-                className={`max-h-[80vh] w-auto rounded-xl object-contain shadow-2xl transition-opacity duration-300 ${
-                  loaded ? "opacity-100" : "opacity-0"
+                fill
+                sizes={FULL_SIZES}
+                draggable={false}
+                className={`!m-0 object-cover transition-opacity duration-300 ${
+                  loaded[photo.image] ? "opacity-100" : "opacity-0"
                 }`}
-                priority
+                onLoad={() => setLoaded((l) => ({ ...l, [photo.image]: true }))}
               />
+            </motion.div>
+
+            <div
+              className="relative z-[1] mt-3 flex items-baseline gap-3 text-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {photo.location && (
+                <span className="text-white/90">{photo.location}</span>
+              )}
+              {photo.date && (
+                <span className="text-white/50">
+                  {new Date(photo.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    year: "numeric",
+                    timeZone: "UTC",
+                  })}
+                </span>
+              )}
+              {count > 1 && (
+                <span className="tabular-nums text-white/50">
+                  {index + 1} / {count}
+                </span>
+              )}
             </div>
-            {(photo.location || photo.date) && (
-              <div className="mt-3 flex items-center gap-3 text-sm text-white/90">
-                {photo.location && (
-                  <span className="font-medium">📍 {photo.location}</span>
-                )}
-                {photo.date && (
-                  <span className="text-white/50">
-                    {new Date(photo.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                )}
-                {count > 1 && (
-                  <span className="text-white/50">
-                    {index + 1} / {count}
-                  </span>
-                )}
-              </div>
-            )}
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
+        )}
+      </AnimatePresence>
+    </MotionConfig>,
     document.body,
   );
 }

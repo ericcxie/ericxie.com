@@ -8,20 +8,20 @@ export default function Experiences() {
     <div className="space-y-10">
       <div>
         <h1 className="mb-1 text-xl font-bold">Experiences</h1>
-        <ul className="animated-list cursor-pointer space-y-7">
+        <ul className="animated-list -my-3.5">
           {experienceItems.map((item, index) => (
             <li key={index}>
-              <ExperienceCard key={index} item={item} />
+              <ExperienceCard item={item} className="py-3.5" />
             </li>
           ))}
         </ul>
       </div>
       <div>
         <h1 className="mb-1 text-xl font-bold">Community</h1>
-        <ul className="animated-list cursor-pointer space-y-7">
+        <ul className="animated-list -my-3.5">
           {communityItems.map((item, index) => (
             <li key={index}>
-              <ExperienceCard key={index} item={item} />
+              <ExperienceCard item={item} className="py-3.5" />
             </li>
           ))}
         </ul>

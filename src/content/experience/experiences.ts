@@ -2,7 +2,6 @@ export const experienceItems = [
   {
     company: "Amazon",
     position: "Software Engineer Intern",
-    location: "Vancouver, BC",
     date: "05/2026 - 08/2026",
     logo: "/img/logos/mono/amazon.png",
     color: "#FF6200",
@@ -13,7 +12,6 @@ export const experienceItems = [
   {
     company: "Gem",
     position: "Software Engineer Intern",
-    location: "San Francisco, CA",
     date: "01/2026 - 04/2026",
     logo: "/img/logos/mono/gem.png",
     color: "#0E61FF",
@@ -24,7 +22,6 @@ export const experienceItems = [
   {
     company: "Shopify",
     position: "Software Engineer Intern",
-    location: "Toronto, ON",
     date: "01/2025 - 04/2025",
     logo: "/img/logos/mono/shopify.png",
     color: "#41623B",
@@ -35,7 +32,6 @@ export const experienceItems = [
   {
     company: "Lawbrokr",
     position: "Software Developer Intern",
-    location: "Toronto, ON",
     date: "05/2024 - 08/2024",
     logo: "/img/logos/mono/lawbrokr.png",
     color: "#B6B2D3",
@@ -46,7 +42,6 @@ export const experienceItems = [
   {
     company: "BMO Financial Group",
     position: "Software Engineer Intern",
-    location: "Toronto, ON",
     date: "09/2023 - 12/2023",
     logo: "/img/logos/mono/bmo.png",
     color: "#0A75BB",
@@ -57,7 +52,6 @@ export const experienceItems = [
   {
     company: "Brookfield",
     position: "Software Developer Intern",
-    location: "Toronto, ON",
     date: "01/2023 - 04/2023",
     logo: "/img/logos/mono/brookfield.png",
     logoWidth: 36,
@@ -72,7 +66,6 @@ export const communityItems = [
   {
     company: "Wat Street",
     position: "Backend Developer",
-    location: "Waterloo, ON",
     date: "01/2025 - 08/2025",
     logo: "/img/logos/mono/watstreet.png",
     color: "#1B1605",
@@ -83,7 +76,6 @@ export const communityItems = [
   {
     company: "Hack the North",
     position: "Organizer",
-    location: "Waterloo, ON",
     date: "03/2024 - 10/2024",
     logo: "/img/logos/mono/hackthenorth.png",
     color: "#141414",
@@ -97,7 +89,6 @@ export const schoolItems = [
   {
     company: "University of Waterloo",
     position: "Computer Engineering",
-    location: "Waterloo, ON",
     date: "09/2022 - 04/2027",
     logo: "/img/logos/mono/uwaterloo.png",
     color: "#666745",

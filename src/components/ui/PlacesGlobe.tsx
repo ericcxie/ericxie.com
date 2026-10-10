@@ -148,7 +148,7 @@ export default function PlacesGlobe({ places }: { places: Place[] }) {
         const visible = geoDistance(point, center) < Math.PI / 2 - 0.08;
         const xy = projection(point);
         if (!xy) return;
-        pin.style.transform = `translate(${xy[0]}px, ${xy[1]}px) translate(-50%, -50%)`;
+        pin.style.translate = `${xy[0]}px ${xy[1]}px`;
         pin.style.opacity = visible ? "1" : "0";
         pin.style.pointerEvents = visible ? "auto" : "none";
       });

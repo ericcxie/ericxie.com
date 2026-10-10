@@ -1,10 +1,10 @@
 "use client";
 // ExperienceCard.tsx
+import { cn } from "@/utils/cn";
 
 type ExperienceItem = {
   company: string;
   position: string;
-  location: string;
   date: string;
   logo: string;
   // Wide wordmarks need more room than the default 24px box
@@ -15,36 +15,29 @@ type ExperienceItem = {
   incoming: boolean;
 };
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-// "05/2026 - 08/2026" -> "May – Aug 2026"; the year shows twice only when the range spans years
-const formatRange = (range: string) => {
-  const [start, end] = range.split("-").map((part) => {
-    const [month, year] = part.trim().split("/");
-    return { month: MONTHS[Number(month) - 1], year };
-  });
-  if (!start.month || !end?.month) return range;
-  return start.year === end.year
-    ? `${start.month} – ${end.month} ${end.year}`
-    : `${start.month} ${start.year} – ${end.month} ${end.year}`;
+// "05/2026 - 08/2026" -> "2026"; a range across years shows both, like "2022 – 2027"
+const formatYears = (range: string) => {
+  const [start, end] = range
+    .split("-")
+    .map((part) => part.trim().split("/")[1]);
+  if (!start || !end) return range;
+  return start === end ? end : `${start} – ${end}`;
 };
 
-export const ExperienceCard = ({ item }: { item: ExperienceItem }) => {
+export const ExperienceCard = ({
+  item,
+  className,
+}: {
+  item: ExperienceItem;
+  className?: string;
+}) => {
   return (
-    <a href={item.link} target="_blank" rel="noopener noreferrer">
+    <a
+      href={item.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn("block", className)}
+    >
       <div className="flex items-center justify-between">
         <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-100 text-neutral-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:border-neutral-800 dark:bg-[#1c1c1c] dark:text-neutral-400 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           {/* The logo file is used as a mask, so it renders as a silhouette in the text colour */}
@@ -83,14 +76,9 @@ export const ExperienceCard = ({ item }: { item: ExperienceItem }) => {
             {item.position}
           </span>
         </div>
-        <div className="flex flex-col items-end">
-          <span className="text-[13px] text-text-light-body dark:text-text-dark-headerDark md:text-sm">
-            {item.location}
-          </span>
-          <span className="text-xs text-text-light-body dark:text-text-dark-headerDark md:text-[13px]">
-            {formatRange(item.date)}
-          </span>
-        </div>
+        <span className="text-[13px] text-text-light-body dark:text-text-dark-headerDark md:text-sm">
+          {formatYears(item.date)}
+        </span>
       </div>
     </a>
   );
