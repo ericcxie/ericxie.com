@@ -3,6 +3,7 @@ import matter from "gray-matter";
 import moment from "moment";
 import path from "path";
 import { renderBlogMarkdown } from "@/lib/blog-markdown-html";
+import { rehypeImageSizes } from "@/lib/rehype-image-sizes";
 import { PostItem } from "@/types";
 
 const postsDirectory = path.join(process.cwd(), "src", "content", "blog");
@@ -71,7 +72,9 @@ export const getPostData = async (id: string) => {
 
   const matterResult = matter(fileContents);
 
-  const contentHtml = await renderBlogMarkdown(matterResult.content);
+  const contentHtml = await renderBlogMarkdown(matterResult.content, [
+    rehypeImageSizes,
+  ]);
   const readingTime = calculateReadingTime(matterResult.content);
 
   return {
