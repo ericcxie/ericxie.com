@@ -5,6 +5,8 @@ export interface PhotoMetadata {
   url: string;
   filename: string;
   location: string;
+  lng?: number;
+  lat?: number;
   date: string;
 }
 

@@ -2,11 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
+import type { PickedPlace } from "@/lib/places";
+import LocationInput from "@/components/ui/LocationInput";
 
 interface PhotoEntry {
   filename: string;
   date: string;
   location: string;
+  lng?: number;
+  lat?: number;
 }
 
 export default function PhotosEditPage() {
@@ -16,7 +20,9 @@ export default function PhotosEditPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingFilename, setEditingFilename] = useState<string | null>(null);
-  const [editLocation, setEditLocation] = useState("");
+  const [editLocation, setEditLocation] = useState<PickedPlace>({
+    location: "",
+  });
   const [editDate, setEditDate] = useState("");
   const [deletedFilenames, setDeletedFilenames] = useState<Set<string>>(
     new Set(),
@@ -52,7 +58,11 @@ export default function PhotosEditPage() {
 
   const startEdit = (photo: PhotoEntry) => {
     setEditingFilename(photo.filename);
-    setEditLocation(photo.location);
+    setEditLocation({
+      location: photo.location,
+      lng: photo.lng,
+      lat: photo.lat,
+    });
     setEditDate(photo.date ? photo.date.split("T")[0] : "");
   };
 
@@ -63,7 +73,9 @@ export default function PhotosEditPage() {
         p.filename === editingFilename
           ? {
               ...p,
-              location: editLocation,
+              location: editLocation.location,
+              lng: editLocation.lng,
+              lat: editLocation.lat,
               date: new Date(editDate).toISOString(),
             }
           : p,
@@ -71,6 +83,13 @@ export default function PhotosEditPage() {
     );
     setEditingFilename(null);
   };
+
+  // A changed location must come from a suggestion so it has coordinates.
+  const editingPhoto = photos.find((p) => p.filename === editingFilename);
+  const canApply =
+    !editLocation.location.trim() ||
+    editLocation.lng != null ||
+    editLocation.location === editingPhoto?.location;
 
   const hasChanges = () => {
     if (deletedFilenames.size > 0) return true;
@@ -239,12 +258,9 @@ export default function PhotosEditPage() {
 
                 {editingFilename === photo.filename ? (
                   <div className="flex flex-col gap-1.5">
-                    <input
-                      type="text"
-                      value={editLocation}
-                      onChange={(e) => setEditLocation(e.target.value)}
-                      placeholder="City, Country"
-                      className="rounded border border-neutral-300 bg-transparent px-2 py-1 text-xs outline-none focus:border-neutral-500 dark:border-neutral-700 dark:focus:border-neutral-500"
+                    <LocationInput
+                      value={editLocation.location}
+                      onChange={setEditLocation}
                       autoFocus
                     />
                     <input
@@ -256,7 +272,8 @@ export default function PhotosEditPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={applyEdit}
-                        className="self-start text-xs font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                        disabled={!canApply}
+                        className="self-start text-xs font-medium text-neutral-700 hover:text-neutral-900 disabled:opacity-50 dark:text-neutral-300 dark:hover:text-neutral-100"
                       >
                         Apply
                       </button>

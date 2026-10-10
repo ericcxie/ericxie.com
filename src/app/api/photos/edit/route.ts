@@ -9,6 +9,8 @@ interface PhotoEntry {
   filename: string;
   date: string;
   location: string;
+  lng?: number;
+  lat?: number;
 }
 
 interface EditPayload {

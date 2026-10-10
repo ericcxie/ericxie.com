@@ -2,14 +2,19 @@
 
 import { useCallback, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
+import type { PhotoMetadata } from "@/app/api/photos/route";
 import exifr from "exifr";
 import { useAuth } from "@/lib/useAuth";
+import { reverseGeocode } from "@/lib/places";
+import LocationInput from "@/components/ui/LocationInput";
 
 interface StagedPhoto {
   id: string;
   file: File;
   preview: string;
   location: string;
+  lng?: number;
+  lat?: number;
   date: string;
   locationLoading: boolean;
   uploading: boolean;
@@ -81,26 +86,6 @@ function compressImage(file: File): Promise<File> {
   });
 }
 
-async function reverseGeocode(
-  lat: number,
-  lng: number,
-): Promise<string> {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10`,
-    );
-    const data = await res.json();
-    const addr = data.address;
-    const city =
-      addr.city || addr.town || addr.village || addr.county || "";
-    const country = addr.country || "";
-    if (city && country) return `${city}, ${country}`;
-    return city || country || "";
-  } catch {
-    return "";
-  }
-}
-
 async function extractMetadata(
   file: File,
 ): Promise<{ location: string; date: string; locationLoading: boolean }> {
@@ -130,17 +115,22 @@ async function extractMetadata(
   }
 }
 
-async function extractGpsLocation(file: File): Promise<string> {
+// GPS-tagged photos keep their exact coordinates; only the label is looked up.
+async function extractGpsLocation(
+  file: File,
+): Promise<{ location: string; lng?: number; lat?: number }> {
   try {
     const exif = await exifr.parse(file, {
       gps: true,
       pick: ["latitude", "longitude"],
     });
     if (!exif || exif.latitude === undefined || exif.longitude === undefined)
-      return "";
-    return reverseGeocode(exif.latitude, exif.longitude);
+      return { location: "" };
+    const location = await reverseGeocode(exif.longitude, exif.latitude);
+    if (!location) return { location: "" };
+    return { location, lng: exif.longitude, lat: exif.latitude };
   } catch {
-    return "";
+    return { location: "" };
   }
 }
 
@@ -175,11 +165,11 @@ export default function UploadPage() {
       // Resolve GPS locations in background
       for (const photo of newPhotos) {
         if (photo.locationLoading) {
-          extractGpsLocation(photo.file).then((location) => {
+          extractGpsLocation(photo.file).then((place) => {
             setStagedPhotos((prev) =>
               prev.map((p) =>
                 p.id === photo.id
-                  ? { ...p, location, locationLoading: false }
+                  ? { ...p, ...place, locationLoading: false }
                   : p,
               ),
             );
@@ -244,7 +234,7 @@ export default function UploadPage() {
     );
 
     // Process results and collect successful uploads for metadata
-    const newPhotos: { url: string; filename: string; location: string; date: string }[] = [];
+    const newPhotos: PhotoMetadata[] = [];
 
     for (let i = 0; i < toUpload.length; i++) {
       const result = uploadResults[i];
@@ -254,6 +244,8 @@ export default function UploadPage() {
           url: result.value.url,
           filename: result.value.filename,
           location: toUpload[i].location,
+          lng: toUpload[i].lng,
+          lat: toUpload[i].lat,
           date: new Date(toUpload[i].date).toISOString(),
         });
       } else {
@@ -286,9 +278,8 @@ export default function UploadPage() {
   const pendingCount = pending.length;
   const uploadedCount = stagedPhotos.filter((p) => p.uploaded).length;
   const isUploading = stagedPhotos.some((p) => p.uploading);
-  const missingInfo = pending.some(
-    (p) => !p.location.trim() || !p.date,
-  );
+  const hasPlace = (p: StagedPhoto) => p.lng != null && p.lat != null;
+  const missingInfo = pending.some((p) => !hasPlace(p) || !p.date);
   const isLocationLoading = pending.some((p) => p.locationLoading);
 
   if (checking) {
@@ -440,14 +431,15 @@ export default function UploadPage() {
                   {/* Location */}
                   {editingId === photo.id ? (
                     <div className="flex flex-col gap-1.5">
-                      <input
-                        type="text"
+                      <LocationInput
                         value={photo.location}
-                        onChange={(e) =>
-                          updatePhoto(photo.id, { location: e.target.value })
+                        onChange={(place) =>
+                          updatePhoto(photo.id, {
+                            lng: undefined,
+                            lat: undefined,
+                            ...place,
+                          })
                         }
-                        placeholder="City, Country"
-                        className="rounded border border-neutral-300 bg-transparent px-2 py-1 text-xs outline-none focus:border-neutral-500 dark:border-neutral-700 dark:focus:border-neutral-500"
                         autoFocus
                       />
                       <input
@@ -480,6 +472,11 @@ export default function UploadPage() {
                             {photo.location || "No location"} &middot;{" "}
                             {photo.date}
                           </span>
+                          {!photo.uploaded && photo.location && !hasPlace(photo) && (
+                            <span className="ml-1.5 text-amber-600 dark:text-amber-400">
+                              pick a suggested place
+                            </span>
+                          )}
                           {!photo.uploaded && (
                             <span className="ml-1.5 text-neutral-400">
                               (edit)

@@ -59,6 +59,8 @@ interface BlobMetadataEntry {
   url: string;
   filename: string;
   location: string;
+  lng?: number;
+  lat?: number;
   date: string;
 }
 
@@ -132,15 +134,18 @@ async function sync() {
         filename: photo.filename,
         date: photo.date,
         location: photo.location,
+        lng: photo.lng,
+        lat: photo.lat,
       });
     } catch (err) {
       console.error(`Error downloading ${photo.filename}:`, err);
     }
   }
 
-  // Resolve coordinates for each distinct location, reusing any we already
-  // know (from existing photos.json entries or the hardcoded lookup) so we
-  // only ever hit the geocoding API for genuinely new places.
+  // Photos picked from the upload page's autocomplete (or GPS-tagged) already
+  // carry coordinates. For any that don't, reuse coordinates we already know
+  // (from existing photos.json entries or the hardcoded lookup) so we only
+  // ever hit the geocoding API for genuinely new places.
   const coordCache = new Map<string, [number, number]>();
   for (const p of localPhotos) {
     if (p.location && p.lng != null && p.lat != null) {
@@ -152,7 +157,7 @@ async function sync() {
   }
 
   for (const entry of syncedEntries) {
-    if (!entry.location) continue;
+    if (!entry.location || (entry.lng != null && entry.lat != null)) continue;
     let coords = coordCache.get(entry.location);
     if (!coords) {
       const geocoded = await geocode(entry.location);
