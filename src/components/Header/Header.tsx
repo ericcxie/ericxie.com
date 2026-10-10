@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import { Popover, Transition } from "@headlessui/react";
-import { Bars3Icon } from "@heroicons/react/20/solid";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { Command } from "lucide-react";
@@ -25,10 +24,38 @@ const autograf = local({
   variable: "--font-autograf",
 });
 
+const menuLine =
+  "absolute left-[calc(50%-11px)] top-[calc(50%-1px)] h-[2px] w-[22px] rounded-full bg-current transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]";
+
+// While the mobile menu is open, close it on any press outside it, or as soon
+// as the page scrolls
+function CloseOnOutside({
+  rootRef,
+  close,
+}: {
+  rootRef: React.RefObject<HTMLElement>;
+  close: () => void;
+}) {
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) close();
+    };
+    const onScroll = () => close();
+    document.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [rootRef, close]);
+
+  return null;
+}
+
 export default function Header() {
   const pathname = `/${usePathname().split("/")[1]}`;
   const [hoveredPath, setHoveredPath] = useState(pathname);
-  const popoverButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [disableAnimation, setDisableAnimation] = useState(true);
 
@@ -53,13 +80,6 @@ export default function Header() {
 
     return () => clearTimeout(timer);
   }, [pathname]);
-
-  const handleLinkClick = () => {
-    if (popoverButtonRef.current) {
-      popoverButtonRef.current.click();
-    }
-    setDisableAnimation(true);
-  };
 
   return (
     <header
@@ -150,42 +170,68 @@ export default function Header() {
         </div>
 
         {/* Mobile menu bar */}
-        <Popover className="relative md:hidden">
-          <Popover.Button
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-text-light-body dark:text-text-dark-headerDark"
-            ref={popoverButtonRef}
-          >
-            <Bars3Icon className="hover:text-primary h-8 w-8 cursor-pointer text-text-light-body transition-colors dark:text-text-dark-headerDark" />
-          </Popover.Button>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-200"
-            enterFrom="opacity-0 translate-y-1"
-            enterTo="opacity-100 translate-y-0"
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100 translate-y-0"
-            leaveTo="opacity-0 translate-y-1"
-          >
-            <Popover.Panel className="bg-primary absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-auto rounded-xl border border-neutral-400 bg-background-light p-2 text-base shadow-lg focus:outline-none dark:bg-background-dark sm:text-sm">
-              <div className="grid">
-                {links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={clsx(
-                      "hover:text-primary rounded-md px-4 py-2 transition-colors",
-                      pathname === link.href
-                        ? "bg-gray-200 font-medium dark:bg-stone-800/80"
-                        : "font-normal",
-                    )}
-                    onClick={handleLinkClick}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </Popover.Panel>
-          </Transition>
+        <Popover ref={menuRef} className="relative md:hidden">
+          {({ open, close }) => (
+            <>
+              {open && <CloseOnOutside rootRef={menuRef} close={close} />}
+              <Popover.Button
+                aria-label={open ? "Close menu" : "Open menu"}
+                className="relative flex h-8 w-8 items-center justify-center rounded-lg text-text-light-body dark:text-text-dark-headerDark"
+              >
+                {/* Three bars that fold into an ✕ */}
+                <span
+                  aria-hidden
+                  className={clsx(
+                    menuLine,
+                    open ? "rotate-45" : "-translate-y-[7px]",
+                  )}
+                />
+                <span
+                  aria-hidden
+                  className={clsx(menuLine, open && "scale-x-0 opacity-0")}
+                />
+                <span
+                  aria-hidden
+                  className={clsx(
+                    menuLine,
+                    open ? "-rotate-45" : "translate-y-[7px]",
+                  )}
+                />
+              </Popover.Button>
+              <Transition
+                as={Fragment}
+                enter="transition duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                enterFrom="opacity-0 scale-95 -translate-y-1"
+                enterTo="opacity-100 scale-100 translate-y-0"
+                leave="transition duration-150 ease-in"
+                leaveFrom="opacity-100 scale-100 translate-y-0"
+                leaveTo="opacity-0 scale-95 -translate-y-1"
+              >
+                <Popover.Panel className="bg-primary absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-auto rounded-xl border border-neutral-400 bg-background-light p-2 text-base shadow-lg focus:outline-none dark:bg-background-dark sm:text-sm">
+                  <div className="grid">
+                    {links.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={clsx(
+                          "hover:text-primary rounded-md px-4 py-2 transition-colors",
+                          pathname === link.href
+                            ? "bg-gray-200 font-medium dark:bg-stone-800/80"
+                            : "font-normal",
+                        )}
+                        onClick={() => {
+                          close();
+                          setDisableAnimation(true);
+                        }}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </>
+          )}
         </Popover>
       </nav>
     </header>
