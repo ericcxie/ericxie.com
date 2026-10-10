@@ -76,8 +76,29 @@
   @apply bg-transparent p-0;
 }
 
+/* Images carry their real width/height (set at build), so `height: auto`
+   reserves the right box before they load. The pulse fills that box until
+   PostBody marks the image loaded. */
 .post img {
-  @apply rounded-2xl;
+  @apply h-auto max-w-full rounded-2xl bg-neutral-200 dark:bg-neutral-800;
+  animation: post-img-pulse 1.5s ease-in-out infinite;
+}
+
+.post img[data-loaded] {
+  @apply bg-transparent;
+  animation: none;
+}
+
+@keyframes post-img-pulse {
+  50% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post img {
+    animation: none;
+  }
 }
 
 .post > blockquote {

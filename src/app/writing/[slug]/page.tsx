@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import type { Metadata } from "next";
 import { getAllPosts, getPostData } from "@/lib/blogs";
+import PostBody from "../components/PostBody";
 
 type Params = { params: { slug: string } };
 
@@ -37,10 +38,7 @@ const Post = async ({ params }: Params) => {
           {postData.date} · {postData.readingTime} min read
         </p>
       </div>
-      <article
-        className="post"
-        dangerouslySetInnerHTML={{ __html: postData.contentHtml }}
-      />
+      <PostBody html={postData.contentHtml} />
     </section>
   );
 };
