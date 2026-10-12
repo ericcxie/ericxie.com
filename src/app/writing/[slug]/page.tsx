@@ -10,9 +10,7 @@ type Params = { params: { slug: string } };
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getAllPosts()
-    .filter((post) => post.id !== ".gitkeep")
-    .map((post) => ({ slug: post.id }));
+  return getAllPosts().map((post) => ({ slug: post.id }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

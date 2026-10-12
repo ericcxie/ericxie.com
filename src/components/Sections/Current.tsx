@@ -1,18 +1,11 @@
 import PlacesGlobe from "@/components/ui/PlacesGlobe";
-import photosData from "@/content/photos/photos.json";
 import { locationCoordinates, type Place } from "@/content/photos/locations";
-
-type RawPhoto = {
-  filename: string;
-  date: string;
-  location: string;
-  lng?: number;
-  lat?: number;
-};
+import { photoSrc, photos } from "@/lib/photos";
+import type { PhotoEntry } from "@/types";
 
 // Prefer coordinates stored on the photo (geocoded at sync time), then fall
 // back to the hardcoded lookup for older entries. Returns null if unknown.
-function coordsFor(photo: RawPhoto): [number, number] | null {
+function coordsFor(photo: PhotoEntry): [number, number] | null {
   if (photo.lng != null && photo.lat != null) return [photo.lng, photo.lat];
   return locationCoordinates[photo.location] ?? null;
 }
@@ -20,11 +13,10 @@ function coordsFor(photo: RawPhoto): [number, number] | null {
 function getPlaces(): Place[] {
   const byLocation = new Map<string, Place>();
 
-  (photosData as RawPhoto[])
+  photos
     .filter((p) => p.location && coordsFor(p))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .forEach((photo) => {
-      const image = `/img/photos/${photo.filename}`;
+      const image = photoSrc(photo.filename);
       const existing = byLocation.get(photo.location);
       if (existing) {
         existing.count += 1;

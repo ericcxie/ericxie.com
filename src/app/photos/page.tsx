@@ -1,14 +1,12 @@
 import { PhotoGallery } from "@/components/ui/PhotoGallery";
-import photosData from "@/content/photos/photos.json";
+import { photoSrc, photos } from "@/lib/photos";
 
 export default function Photos() {
-  const allPhotos = photosData
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .map((photo) => ({
-      image: `/img/photos/${photo.filename}`,
-      location: photo.location,
-      date: photo.date,
-    }));
+  const allPhotos = photos.map((photo) => ({
+    image: photoSrc(photo.filename),
+    location: photo.location,
+    date: photo.date,
+  }));
 
   return (
     <main className="flex flex-col gap-4">

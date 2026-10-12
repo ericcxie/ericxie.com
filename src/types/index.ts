@@ -28,3 +28,15 @@ export type ProjectItem = {
   order: number;
   featured: boolean;
 };
+
+// One entry in src/content/photos/photos.json
+export type PhotoEntry = {
+  filename: string;
+  date: string;
+  location: string;
+  lng?: number;
+  lat?: number;
+};
+
+// A photo uploaded to Vercel Blob, waiting for the sync action to pull it in
+export type PhotoMetadata = PhotoEntry & { url: string };

@@ -2,9 +2,10 @@
 
 import { useCallback, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
-import type { PhotoMetadata } from "@/app/api/photos/route";
+import type { PhotoMetadata } from "@/types";
 import exifr from "exifr";
 import { useAuth } from "@/lib/useAuth";
+import AdminLogin, { adminButton } from "@/components/AdminLogin";
 import { reverseGeocode } from "@/lib/places";
 import LocationInput from "@/components/ui/LocationInput";
 
@@ -98,12 +99,9 @@ async function extractMetadata(
     if (!exif) return { location: "", date: today, locationLoading: false };
 
     const date = exif.DateTimeOriginal || exif.CreateDate;
-    const dateStr = date
-      ? new Date(date).toISOString().split("T")[0]
-      : today;
+    const dateStr = date ? new Date(date).toISOString().split("T")[0] : today;
 
-    const hasGps =
-      exif.latitude !== undefined && exif.longitude !== undefined;
+    const hasGps = exif.latitude !== undefined && exif.longitude !== undefined;
 
     return {
       location: "",
@@ -135,50 +133,48 @@ async function extractGpsLocation(
 }
 
 export default function UploadPage() {
-  const { password, setPassword, authenticated, loginError, handleLogin, checking, lockedOut } = useAuth();
+  const auth = useAuth();
+  const { password, authenticated } = auth;
   const [stagedPhotos, setStagedPhotos] = useState<StagedPhoto[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const addFiles = useCallback(
-    async (files: FileList | File[]) => {
-      const newPhotos: StagedPhoto[] = [];
-      for (const file of Array.from(files)) {
-        if (!file.type.startsWith("image/")) continue;
-        const id = crypto.randomUUID();
-        const preview = URL.createObjectURL(file);
-        const meta = await extractMetadata(file);
-        newPhotos.push({
-          id,
-          file,
-          preview,
-          location: meta.location,
-          date: meta.date,
-          locationLoading: meta.locationLoading,
-          uploading: false,
-          uploaded: false,
+  const addFiles = useCallback(async (files: FileList | File[]) => {
+    const newPhotos: StagedPhoto[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      const id = crypto.randomUUID();
+      const preview = URL.createObjectURL(file);
+      const meta = await extractMetadata(file);
+      newPhotos.push({
+        id,
+        file,
+        preview,
+        location: meta.location,
+        date: meta.date,
+        locationLoading: meta.locationLoading,
+        uploading: false,
+        uploaded: false,
+      });
+    }
+    setStagedPhotos((prev) => [...prev, ...newPhotos]);
+
+    // Resolve GPS locations in background
+    for (const photo of newPhotos) {
+      if (photo.locationLoading) {
+        extractGpsLocation(photo.file).then((place) => {
+          setStagedPhotos((prev) =>
+            prev.map((p) =>
+              p.id === photo.id
+                ? { ...p, ...place, locationLoading: false }
+                : p,
+            ),
+          );
         });
       }
-      setStagedPhotos((prev) => [...prev, ...newPhotos]);
-
-      // Resolve GPS locations in background
-      for (const photo of newPhotos) {
-        if (photo.locationLoading) {
-          extractGpsLocation(photo.file).then((place) => {
-            setStagedPhotos((prev) =>
-              prev.map((p) =>
-                p.id === photo.id
-                  ? { ...p, ...place, locationLoading: false }
-                  : p,
-              ),
-            );
-          });
-        }
-      }
-    },
-    [],
-  );
+    }
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -282,59 +278,7 @@ export default function UploadPage() {
   const missingInfo = pending.some((p) => !hasPlace(p) || !p.date);
   const isLocationLoading = pending.some((p) => p.locationLoading);
 
-  if (checking) {
-    return (
-      <main className="flex flex-col gap-4">
-        <h1
-          className="animate-in font-system text-3xl font-bold"
-          style={{ "--index": 1 } as React.CSSProperties}
-        >
-          Upload
-        </h1>
-        <p className="animate-in text-sm text-neutral-500" style={{ "--index": 2 } as React.CSSProperties}>Loading...</p>
-      </main>
-    );
-  }
-
-  if (!authenticated) {
-    return (
-      <main className="flex flex-col gap-4">
-        <h1
-          className="animate-in font-system text-3xl font-bold"
-          style={{ "--index": 1 } as React.CSSProperties}
-        >
-          Upload
-        </h1>
-        <form
-          onSubmit={handleLogin}
-          className="animate-in flex flex-col gap-4"
-          style={{ "--index": 2 } as React.CSSProperties}
-        >
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            disabled={lockedOut}
-            className="rounded-lg border border-neutral-300 bg-transparent px-4 py-2 text-sm outline-none focus:border-neutral-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:focus:border-neutral-500"
-            autoFocus
-          />
-          {(loginError || lockedOut) && (
-            <p className="text-sm text-red-500">
-              {lockedOut ? "Too many failed attempts. Try again in 8760 hours." : loginError}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={lockedOut}
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
-            Continue
-          </button>
-        </form>
-      </main>
-    );
-  }
+  if (!authenticated) return <AdminLogin title="Upload" auth={auth} />;
 
   return (
     <main className="flex flex-col gap-4">
@@ -346,7 +290,7 @@ export default function UploadPage() {
       </h1>
 
       <div
-        className="animate-in flex flex-col gap-4"
+        className="flex animate-in flex-col gap-4"
         style={{ "--index": 2 } as React.CSSProperties}
       >
         {/* Drop zone */}
@@ -459,9 +403,7 @@ export default function UploadPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() =>
-                        !photo.uploaded && setEditingId(photo.id)
-                      }
+                      onClick={() => !photo.uploaded && setEditingId(photo.id)}
                       className="self-start text-left text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
                     >
                       {photo.locationLoading ? (
@@ -472,11 +414,13 @@ export default function UploadPage() {
                             {photo.location || "No location"} &middot;{" "}
                             {photo.date}
                           </span>
-                          {!photo.uploaded && photo.location && !hasPlace(photo) && (
-                            <span className="ml-1.5 text-amber-600 dark:text-amber-400">
-                              pick a suggested place
-                            </span>
-                          )}
+                          {!photo.uploaded &&
+                            photo.location &&
+                            !hasPlace(photo) && (
+                              <span className="ml-1.5 text-amber-600 dark:text-amber-400">
+                                pick a suggested place
+                              </span>
+                            )}
                           {!photo.uploaded && (
                             <span className="ml-1.5 text-neutral-400">
                               (edit)
@@ -508,7 +452,7 @@ export default function UploadPage() {
                 <button
                   onClick={uploadAll}
                   disabled={isUploading || missingInfo || isLocationLoading}
-                  className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
+                  className={adminButton}
                 >
                   {isUploading
                     ? "Uploading..."

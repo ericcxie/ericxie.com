@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { isAuthorized, unauthorized } from "@/lib/server/auth";
+import {
+  commitToMain,
+  createBlob,
+  deleteFile,
+  type TreeEntry,
+} from "@/lib/server/github";
 
-const GITHUB_REPO = "ericcxie/ericxie.ca";
 const BLOG_DIR = "src/content/blog";
-
-function isAuthorized(request: NextRequest): boolean {
-  const password = request.headers.get("x-upload-password");
-  return password === process.env.UPLOAD_PASSWORD;
-}
 
 // GET: Return list of posts or a single post's raw markdown
 export async function GET(request: NextRequest) {
@@ -58,9 +59,7 @@ export async function GET(request: NextRequest) {
 
 // POST: Create or update a blog post via GitHub API
 export async function POST(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAuthorized(request)) return unauthorized();
 
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
@@ -85,111 +84,34 @@ export async function POST(request: NextRequest) {
 
     const filePath = `${BLOG_DIR}/${slug}.md`;
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github.v3+json",
-      "Content-Type": "application/json",
-    };
-
-    const apiBase = `https://api.github.com/repos/${GITHUB_REPO}`;
-
-    // 1. Get the current commit SHA for main
-    const refRes = await fetch(`${apiBase}/git/ref/heads/main`, { headers });
-    const refData = await refRes.json();
-    const latestCommitSha = refData.object.sha;
-
-    // 2. Get the tree SHA from that commit
-    const commitRes = await fetch(
-      `${apiBase}/git/commits/${latestCommitSha}`,
-      { headers },
-    );
-    const commitData = await commitRes.json();
-    const baseTreeSha = commitData.tree.sha;
-
-    // 3. Create blob for the markdown file
-    const blobRes = await fetch(`${apiBase}/git/blobs`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ content: frontmatter, encoding: "utf-8" }),
-    });
-    const blob = await blobRes.json();
-
-    // 3b. Create blobs for any images
-    const treeEntries: {
-      path: string;
-      mode: string;
-      type: string;
-      sha: string;
-    }[] = [
+    const tree: TreeEntry[] = [
       {
         path: filePath,
         mode: "100644",
         type: "blob",
-        sha: blob.sha,
+        sha: await createBlob(token, frontmatter),
       },
     ];
 
     if (images && Array.isArray(images)) {
-      for (const img of images as {
-        filename: string;
-        base64: string;
-      }[]) {
-        const imgBlobRes = await fetch(`${apiBase}/git/blobs`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            content: img.base64,
-            encoding: "base64",
-          }),
-        });
-        const imgBlob = await imgBlobRes.json();
-        treeEntries.push({
+      for (const img of images as { filename: string; base64: string }[]) {
+        tree.push({
           path: `public/img/blog/${slug}/${img.filename}`,
           mode: "100644",
           type: "blob",
-          sha: imgBlob.sha,
+          sha: await createBlob(token, img.base64, "base64"),
         });
       }
     }
 
-    // 4. Create the new tree
-    const treeRes = await fetch(`${apiBase}/git/trees`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        base_tree: baseTreeSha,
-        tree: treeEntries,
-      }),
-    });
-    const treeData = await treeRes.json();
+    const isNew = !fs.existsSync(path.join(process.cwd(), filePath));
+    const sha = await commitToMain(
+      token,
+      tree,
+      `${isNew ? "add" : "update"} blog post: ${title}`,
+    );
 
-    // Check if this is an existing file to determine commit message
-    const existingPath = path.join(process.cwd(), filePath);
-    const isNew = !fs.existsSync(existingPath);
-    const commitMessage = isNew
-      ? `add blog post: ${title}`
-      : `update blog post: ${title}`;
-
-    // 5. Create the commit
-    const newCommitRes = await fetch(`${apiBase}/git/commits`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        message: commitMessage,
-        tree: treeData.sha,
-        parents: [latestCommitSha],
-      }),
-    });
-    const newCommit = await newCommitRes.json();
-
-    // 6. Update the ref
-    await fetch(`${apiBase}/git/refs/heads/main`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ sha: newCommit.sha }),
-    });
-
-    return NextResponse.json({ success: true, sha: newCommit.sha });
+    return NextResponse.json({ success: true, sha });
   } catch (error) {
     console.error("Blog edit commit error:", error);
     const message =
@@ -200,9 +122,7 @@ export async function POST(request: NextRequest) {
 
 // DELETE: Delete a blog post via GitHub API
 export async function DELETE(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAuthorized(request)) return unauthorized();
 
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
@@ -215,46 +135,20 @@ export async function DELETE(request: NextRequest) {
   try {
     const { slug } = await request.json();
     if (!slug) {
-      return NextResponse.json(
-        { error: "Missing slug" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing slug" }, { status: 400 });
     }
 
-    const filePath = `${BLOG_DIR}/${slug}.md`;
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github.v3+json",
-      "Content-Type": "application/json",
-    };
-
-    const apiBase = `https://api.github.com/repos/${GITHUB_REPO}`;
-
-    // Get file SHA from GitHub
-    const fileRes = await fetch(
-      `${apiBase}/contents/${filePath}?ref=main`,
-      { headers },
+    const found = await deleteFile(
+      token,
+      `${BLOG_DIR}/${slug}.md`,
+      `delete blog post: ${slug}`,
     );
-    const fileData = await fileRes.json();
-
-    if (!fileRes.ok) {
+    if (!found) {
       return NextResponse.json(
         { error: "File not found on GitHub" },
         { status: 404 },
       );
     }
-
-    // Delete file via GitHub Contents API
-    await fetch(`${apiBase}/contents/${filePath}`, {
-      method: "DELETE",
-      headers,
-      body: JSON.stringify({
-        message: `delete blog post: ${slug}`,
-        sha: fileData.sha,
-        branch: "main",
-      }),
-    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 const Custom404 = (): JSX.Element => (
   <div className="flex flex-col gap-2">
     <NotFoundFigure />
-    <h1 className="text-primary mt-6 text-3xl font-bold tracking-tight">404</h1>
-    <p className="text-secondary">
+    <h1 className="mt-6 text-3xl font-bold tracking-tight">404</h1>
+    <p>
       Uh oh! Looks like this page doesn’t exist...
     </p>
     <div className="h-2" />

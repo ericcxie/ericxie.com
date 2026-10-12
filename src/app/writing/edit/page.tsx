@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
+import AdminLogin, { adminButton } from "@/components/AdminLogin";
 import { renderBlogMarkdown } from "@/lib/blog-markdown-html";
 import {
   Bold,
@@ -14,7 +15,7 @@ import {
   ListOrdered,
   Quote,
   Link,
-  Image,
+  Image as ImageIcon,
   Code,
   SquareCode,
   Minus,
@@ -41,8 +42,24 @@ interface PendingImage {
 
 type View = "list" | "editor";
 
+// Post dates are stored as "MM-DD-YYYY"
+const toPostDate = (d: Date) =>
+  `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}-${d.getFullYear()}`;
+const fromPostDate = (date: string) => {
+  const [month, day, year] = date.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const IMAGE_MIME: Record<string, string> = {
+  png: "image/png",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+  webp: "image/webp",
+};
+
 export default function BlogEditPage() {
-  const { password, setPassword, authenticated, loginError, handleLogin, checking, lockedOut } = useAuth();
+  const auth = useAuth();
+  const { password, authenticated } = auth;
 
   const [view, setView] = useState<View>("list");
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -79,30 +96,20 @@ export default function BlogEditPage() {
   useEffect(() => {
     if (editorTab === "preview") {
       renderBlogMarkdown(content).then((html) => {
-          let rendered = html;
-          // Replace pending image paths with inline base64 data URIs
-          for (const img of pendingImages) {
-            const imgPath = `/img/blog/${slug}/${img.filename}`;
-            // Detect content type from filename extension
-            const ext = img.filename.split(".").pop()?.toLowerCase();
-            const mime =
-              ext === "png"
-                ? "image/png"
-                : ext === "gif"
-                  ? "image/gif"
-                  : ext === "svg"
-                    ? "image/svg+xml"
-                    : ext === "webp"
-                      ? "image/webp"
-                      : "image/jpeg";
-            const dataUri = `data:${mime};base64,${img.base64}`;
-            rendered = rendered.replaceAll(
-              `src="${imgPath}"`,
-              `src="${dataUri}"`,
-            );
-          }
-          setPreviewHtml(rendered);
-        });
+        let rendered = html;
+        // Replace pending image paths with inline base64 data URIs
+        for (const img of pendingImages) {
+          const imgPath = `/img/blog/${slug}/${img.filename}`;
+          const ext = img.filename.split(".").pop()?.toLowerCase() ?? "";
+          const mime = IMAGE_MIME[ext] ?? "image/jpeg";
+          const dataUri = `data:${mime};base64,${img.base64}`;
+          rendered = rendered.replaceAll(
+            `src="${imgPath}"`,
+            `src="${dataUri}"`,
+          );
+        }
+        setPreviewHtml(rendered);
+      });
     }
   }, [editorTab, content, pendingImages, slug]);
 
@@ -136,14 +143,10 @@ export default function BlogEditPage() {
       setLoading(false);
     } else {
       // New post
-      const today = new Date();
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const dd = String(today.getDate()).padStart(2, "0");
-      const yyyy = today.getFullYear();
       setSlug("");
       setTitle("");
       setCategory("");
-      setDate(`${mm}-${dd}-${yyyy}`);
+      setDate(toPostDate(new Date()));
       setContent("");
       setIsNew(true);
       setOriginal("");
@@ -179,9 +182,7 @@ export default function BlogEditPage() {
         }),
       });
       if (res.ok) {
-        setOriginal(
-          JSON.stringify({ slug, title, category, date, content }),
-        );
+        setOriginal(JSON.stringify({ slug, title, category, date, content }));
         setPendingImages([]);
         setIsNew(false);
         alert("Blog post saved and deployed!");
@@ -258,13 +259,30 @@ export default function BlogEditPage() {
     // Find the start of the current line
     const lineStart = content.lastIndexOf("\n", start - 1) + 1;
     const newContent =
-      content.substring(0, lineStart) +
-      prefix +
-      content.substring(lineStart);
+      content.substring(0, lineStart) + prefix + content.substring(lineStart);
     setContent(newContent);
     requestAnimationFrame(() => {
       ta.focus();
       ta.selectionStart = ta.selectionEnd = start + prefix.length;
+    });
+  };
+
+  // Wraps the selection as link text and selects "url" for easy replacement
+  const insertLink = () => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const selected = content.substring(start, end);
+    setContent(
+      content.substring(0, start) +
+        `[${selected}](url)` +
+        content.substring(end),
+    );
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.selectionStart = start + selected.length + 3;
+      ta.selectionEnd = start + selected.length + 6;
     });
   };
 
@@ -279,21 +297,7 @@ export default function BlogEditPage() {
       wrapSelection("_", "_");
     } else if (mod && e.key === "k") {
       e.preventDefault();
-      const ta = textareaRef.current;
-      if (!ta) return;
-      const selected = content.substring(ta.selectionStart, ta.selectionEnd);
-      const replacement = `[${selected}](url)`;
-      const start = ta.selectionStart;
-      const end = ta.selectionEnd;
-      const newContent =
-        content.substring(0, start) + replacement + content.substring(end);
-      setContent(newContent);
-      requestAnimationFrame(() => {
-        ta.focus();
-        // Select "url" for easy replacement
-        ta.selectionStart = start + selected.length + 3;
-        ta.selectionEnd = start + selected.length + 6;
-      });
+      insertLink();
     }
   };
 
@@ -356,67 +360,93 @@ export default function BlogEditPage() {
     "w-full rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-neutral-500 dark:border-neutral-700 dark:focus:border-neutral-500";
   const labelClass =
     "text-xs font-medium text-neutral-500 dark:text-neutral-400";
-  const btnClass =
-    "rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200";
+  const toolbar = [
+    [
+      {
+        title: "Bold (Cmd+B)",
+        Icon: Bold,
+        action: () => wrapSelection("**", "**"),
+      },
+      {
+        title: "Italic (Cmd+I)",
+        Icon: Italic,
+        action: () => wrapSelection("_", "_"),
+      },
+      {
+        title: "Strikethrough",
+        Icon: Strikethrough,
+        action: () => wrapSelection("~~", "~~"),
+      },
+    ],
+    [
+      {
+        title: "Heading 1",
+        Icon: Heading1,
+        action: () => insertLinePrefix("# "),
+      },
+      {
+        title: "Heading 2",
+        Icon: Heading2,
+        action: () => insertLinePrefix("## "),
+      },
+      {
+        title: "Heading 3",
+        Icon: Heading3,
+        action: () => insertLinePrefix("### "),
+      },
+    ],
+    [
+      {
+        title: "Bullet list",
+        Icon: List,
+        action: () => insertLinePrefix("- "),
+      },
+      {
+        title: "Numbered list",
+        Icon: ListOrdered,
+        action: () => insertLinePrefix("1. "),
+      },
+      {
+        title: "Blockquote",
+        Icon: Quote,
+        action: () => insertLinePrefix("> "),
+      },
+    ],
+    [
+      { title: "Link (Cmd+K)", Icon: Link, action: insertLink },
+      {
+        title: "Image",
+        Icon: ImageIcon,
+        action: () => insertAtCursor("![alt text](image-url)"),
+      },
+      {
+        title: "Inline code",
+        Icon: Code,
+        action: () => wrapSelection("`", "`"),
+      },
+      {
+        title: "Code block",
+        Icon: SquareCode,
+        action: () => insertAtCursor("\n```\n\n```\n"),
+      },
+      {
+        title: "Horizontal rule",
+        Icon: Minus,
+        action: () => insertAtCursor("\n---\n"),
+      },
+    ],
+  ];
+
   const toolbarBtnClass =
     "rounded px-2 py-1 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700";
 
-  // Loading saved auth
-  if (checking) {
-    return (
-      <main className="flex flex-col gap-4">
-        <h1 className="animate-in font-system text-3xl font-bold" style={{ "--index": 1 } as React.CSSProperties}>
-          Edit Blog
-        </h1>
-        <p className="animate-in text-sm text-neutral-500" style={{ "--index": 2 } as React.CSSProperties}>Loading...</p>
-      </main>
-    );
-  }
-
-  // Login screen
-  if (!authenticated) {
-    return (
-      <main className="flex flex-col gap-4">
-        <h1
-          className="animate-in font-system text-3xl font-bold"
-          style={{ "--index": 1 } as React.CSSProperties}
-        >
-          Edit Blog
-        </h1>
-        <form
-          onSubmit={handleLogin}
-          className="animate-in flex flex-col gap-4"
-          style={{ "--index": 2 } as React.CSSProperties}
-        >
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            disabled={lockedOut}
-            className="rounded-lg border border-neutral-300 bg-transparent px-4 py-2 text-sm outline-none focus:border-neutral-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:focus:border-neutral-500"
-            autoFocus
-          />
-          {(loginError || lockedOut) && (
-            <p className="text-sm text-red-500">
-              {lockedOut ? "Too many failed attempts. Try again in 8760 hours." : loginError}
-            </p>
-          )}
-          <button type="submit" disabled={lockedOut} className={btnClass}>
-            Continue
-          </button>
-        </form>
-      </main>
-    );
-  }
+  if (!authenticated) return <AdminLogin title="Edit Blog" auth={auth} />;
 
   // Loading
   if (loading && view === "list") {
     return (
       <main className="flex flex-col gap-4">
-        <h1 className="animate-in font-system text-3xl font-bold">
-          Edit Blog
-        </h1>
+        <h1 className="animate-in font-system text-3xl font-bold">Edit Blog</h1>
         <p className="text-sm text-neutral-500">Loading...</p>
       </main>
     );
@@ -445,7 +475,7 @@ export default function BlogEditPage() {
             <button
               onClick={savePost}
               disabled={saving || !hasChanges()}
-              className={btnClass}
+              className={adminButton}
             >
               {saving ? "Saving..." : "Save & Deploy"}
             </button>
@@ -504,15 +534,11 @@ export default function BlogEditPage() {
                     className={
                       inputClass +
                       " text-left" +
-                      (!date
-                        ? " text-neutral-400 dark:text-neutral-500"
-                        : "")
+                      (!date ? " text-neutral-400 dark:text-neutral-500" : "")
                     }
                   >
                     {date
-                      ? new Date(
-                          `${date.slice(6)}-${date.slice(0, 2)}-${date.slice(3, 5)}`,
-                        ).toLocaleDateString("en-US", {
+                      ? fromPostDate(date).toLocaleDateString("en-US", {
                           month: "long",
                           day: "numeric",
                           year: "numeric",
@@ -523,24 +549,8 @@ export default function BlogEditPage() {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={
-                      date
-                        ? new Date(
-                            `${date.slice(6)}-${date.slice(0, 2)}-${date.slice(3, 5)}`,
-                          )
-                        : undefined
-                    }
-                    onSelect={(day) => {
-                      if (day) {
-                        const mm = String(day.getMonth() + 1).padStart(
-                          2,
-                          "0",
-                        );
-                        const dd = String(day.getDate()).padStart(2, "0");
-                        const yyyy = day.getFullYear();
-                        setDate(`${mm}-${dd}-${yyyy}`);
-                      }
-                    }}
+                    selected={date ? fromPostDate(date) : undefined}
+                    onSelect={(day) => day && setDate(toPostDate(day))}
                     initialFocus
                   />
                 </PopoverContent>
@@ -552,171 +562,45 @@ export default function BlogEditPage() {
         {/* Write / Preview tabs */}
         <div className="flex flex-col gap-0">
           <div className="flex items-center gap-0 border-b border-neutral-200 dark:border-neutral-800">
-            <button
-              type="button"
-              onClick={() => setEditorTab("write")}
-              className={
-                "px-4 py-2 text-sm font-medium transition-colors " +
-                (editorTab === "write"
-                  ? "border-b-2 border-neutral-900 text-neutral-900 dark:border-neutral-100 dark:text-neutral-100"
-                  : "text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300")
-              }
-            >
-              Write
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditorTab("preview")}
-              className={
-                "px-4 py-2 text-sm font-medium transition-colors " +
-                (editorTab === "preview"
-                  ? "border-b-2 border-neutral-900 text-neutral-900 dark:border-neutral-100 dark:text-neutral-100"
-                  : "text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300")
-              }
-            >
-              Preview
-            </button>
+            {(["write", "preview"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setEditorTab(tab)}
+                className={
+                  "px-4 py-2 text-sm font-medium capitalize transition-colors " +
+                  (editorTab === tab
+                    ? "border-b-2 border-neutral-900 text-neutral-900 dark:border-neutral-100 dark:text-neutral-100"
+                    : "text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300")
+                }
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
           {editorTab === "write" ? (
             <>
               {/* Toolbar */}
               <div className="flex flex-wrap items-center gap-0.5 border-x border-neutral-200 px-2 py-1.5 dark:border-neutral-800">
-                <button
-                  type="button"
-                  onClick={() => wrapSelection("**", "**")}
-                  className={toolbarBtnClass}
-                  title="Bold (Cmd+B)"
-                >
-                  <Bold className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => wrapSelection("_", "_")}
-                  className={toolbarBtnClass}
-                  title="Italic (Cmd+I)"
-                >
-                  <Italic className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => wrapSelection("~~", "~~")}
-                  className={toolbarBtnClass}
-                  title="Strikethrough"
-                >
-                  <Strikethrough className="size-4" />
-                </button>
-                <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700" />
-                <button
-                  type="button"
-                  onClick={() => insertLinePrefix("# ")}
-                  className={toolbarBtnClass}
-                  title="Heading 1"
-                >
-                  <Heading1 className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertLinePrefix("## ")}
-                  className={toolbarBtnClass}
-                  title="Heading 2"
-                >
-                  <Heading2 className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertLinePrefix("### ")}
-                  className={toolbarBtnClass}
-                  title="Heading 3"
-                >
-                  <Heading3 className="size-4" />
-                </button>
-                <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700" />
-                <button
-                  type="button"
-                  onClick={() => insertLinePrefix("- ")}
-                  className={toolbarBtnClass}
-                  title="Bullet list"
-                >
-                  <List className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertLinePrefix("1. ")}
-                  className={toolbarBtnClass}
-                  title="Numbered list"
-                >
-                  <ListOrdered className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertLinePrefix("> ")}
-                  className={toolbarBtnClass}
-                  title="Blockquote"
-                >
-                  <Quote className="size-4" />
-                </button>
-                <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const ta = textareaRef.current;
-                    if (!ta) return;
-                    const selected = content.substring(
-                      ta.selectionStart,
-                      ta.selectionEnd,
-                    );
-                    const replacement = `[${selected}](url)`;
-                    const start = ta.selectionStart;
-                    const end = ta.selectionEnd;
-                    setContent(
-                      content.substring(0, start) +
-                        replacement +
-                        content.substring(end),
-                    );
-                    requestAnimationFrame(() => {
-                      ta.focus();
-                      ta.selectionStart = start + selected.length + 3;
-                      ta.selectionEnd = start + selected.length + 6;
-                    });
-                  }}
-                  className={toolbarBtnClass}
-                  title="Link (Cmd+K)"
-                >
-                  <Link className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertAtCursor("![alt text](image-url)")}
-                  className={toolbarBtnClass}
-                  title="Image"
-                >
-                  <Image className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => wrapSelection("`", "`")}
-                  className={toolbarBtnClass}
-                  title="Inline code"
-                >
-                  <Code className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertAtCursor("\n```\n\n```\n")}
-                  className={toolbarBtnClass}
-                  title="Code block"
-                >
-                  <SquareCode className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => insertAtCursor("\n---\n")}
-                  className={toolbarBtnClass}
-                  title="Horizontal rule"
-                >
-                  <Minus className="size-4" />
-                </button>
+                {toolbar.map((group, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && (
+                      <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700" />
+                    )}
+                    {group.map(({ title, Icon, action }) => (
+                      <button
+                        key={title}
+                        type="button"
+                        onClick={action}
+                        className={toolbarBtnClass}
+                        title={title}
+                      >
+                        <Icon className="size-4" />
+                      </button>
+                    ))}
+                  </Fragment>
+                ))}
               </div>
 
               {/* Markdown textarea */}
@@ -738,7 +622,7 @@ export default function BlogEditPage() {
                       key={img.filename}
                       className="flex items-center gap-1.5 rounded-md border border-neutral-200 px-2 py-1 text-xs dark:border-neutral-800"
                     >
-                      <Image className="size-3 text-neutral-500" />
+                      <ImageIcon className="size-3 text-neutral-500" />
                       <span className="text-neutral-600 dark:text-neutral-400">
                         {img.filename}
                       </span>
@@ -775,7 +659,7 @@ export default function BlogEditPage() {
         </div>
 
         {hasChanges() && (
-          <button onClick={savePost} disabled={saving} className={btnClass}>
+          <button onClick={savePost} disabled={saving} className={adminButton}>
             {saving ? "Saving..." : "Save & Deploy"}
           </button>
         )}
@@ -795,9 +679,7 @@ export default function BlogEditPage() {
         </h1>
         <button
           onClick={() => openEditor()}
-          className={
-            "animate-in " + btnClass
-          }
+          className={`animate-in ${adminButton}`}
           style={{ "--index": 1 } as React.CSSProperties}
         >
           + New Post
@@ -805,7 +687,7 @@ export default function BlogEditPage() {
       </div>
 
       <div
-        className="animate-in flex flex-col gap-2"
+        className="flex animate-in flex-col gap-2"
         style={{ "--index": 2 } as React.CSSProperties}
       >
         {posts.length === 0 ? (

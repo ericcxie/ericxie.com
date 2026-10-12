@@ -2,19 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
+import AdminLogin, { adminButton } from "@/components/AdminLogin";
 import type { PickedPlace } from "@/lib/places";
 import LocationInput from "@/components/ui/LocationInput";
-
-interface PhotoEntry {
-  filename: string;
-  date: string;
-  location: string;
-  lng?: number;
-  lat?: number;
-}
+import type { PhotoEntry } from "@/types";
 
 export default function PhotosEditPage() {
-  const { password, setPassword, authenticated, loginError, handleLogin, checking, lockedOut } = useAuth();
+  const auth = useAuth();
+  const { password, authenticated } = auth;
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
   const [original, setOriginal] = useState<PhotoEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -129,56 +124,7 @@ export default function PhotosEditPage() {
     setSaving(false);
   };
 
-  if (checking) {
-    return (
-      <main className="flex flex-col gap-4">
-        <h1 className="animate-in font-system text-3xl font-bold" style={{ "--index": 1 } as React.CSSProperties}>
-          Edit Photos
-        </h1>
-        <p className="animate-in text-sm text-neutral-500" style={{ "--index": 2 } as React.CSSProperties}>Loading...</p>
-      </main>
-    );
-  }
-
-  if (!authenticated) {
-    return (
-      <main className="flex flex-col gap-4">
-        <h1
-          className="animate-in font-system text-3xl font-bold"
-          style={{ "--index": 1 } as React.CSSProperties}
-        >
-          Edit Photos
-        </h1>
-        <form
-          onSubmit={handleLogin}
-          className="animate-in flex flex-col gap-4"
-          style={{ "--index": 2 } as React.CSSProperties}
-        >
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            disabled={lockedOut}
-            className="rounded-lg border border-neutral-300 bg-transparent px-4 py-2 text-sm outline-none focus:border-neutral-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:focus:border-neutral-500"
-            autoFocus
-          />
-          {(loginError || lockedOut) && (
-            <p className="text-sm text-red-500">
-              {lockedOut ? "Too many failed attempts. Try again in 8760 hours." : loginError}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={lockedOut}
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
-            Continue
-          </button>
-        </form>
-      </main>
-    );
-  }
+  if (!authenticated) return <AdminLogin title="Edit Photos" auth={auth} />;
 
   return (
     <main className="flex flex-col gap-4">
@@ -193,7 +139,7 @@ export default function PhotosEditPage() {
           <button
             onClick={saveAll}
             disabled={saving}
-            className="animate-in rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
+            className={`animate-in ${adminButton}`}
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
@@ -201,7 +147,7 @@ export default function PhotosEditPage() {
       </div>
 
       <div
-        className="animate-in flex flex-col gap-3"
+        className="flex animate-in flex-col gap-3"
         style={{ "--index": 2 } as React.CSSProperties}
       >
         {loading && (
@@ -297,11 +243,7 @@ export default function PhotosEditPage() {
         })}
 
         {hasChanges() && (
-          <button
-            onClick={saveAll}
-            disabled={saving}
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
+          <button onClick={saveAll} disabled={saving} className={adminButton}>
             {saving ? "Saving..." : "Save Changes"}
           </button>
         )}

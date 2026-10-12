@@ -5,6 +5,7 @@ import Projects from "@/components/Sections/Projects";
 import EmailCopyLink from "@/components/EmailCopyLink";
 import { CursorTag } from "@/components/ui/CursorTag";
 import Link from "next/link";
+import { SOCIALS } from "@/content/socials";
 
 import { Spotlight } from "@/components/ui/Spotlight";
 
@@ -32,12 +33,12 @@ export default function Home() {
         >
           <CursorTag
             label={
-              <span className="inline-block origin-[70%_70%] text-sm motion-safe:animate-wave">
+              <span className="motion-safe:animate-wave inline-block origin-[70%_70%] text-sm">
                 👋
               </span>
             }
           >
-            Hey there, I&rsquo;m Eric Xie!
+            Eric Xie
           </CursorTag>
         </h1>
         <p
@@ -62,26 +63,21 @@ export default function Home() {
           style={{ "--index": 4 } as React.CSSProperties}
         >
           <EmailCopyLink label="Email" className={contactLink} />
-          <CursorTag label="open in new tab ↗">
-            <a
-              href="https://www.linkedin.com/in/ericcxie/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={contactLink}
-            >
-              LinkedIn
-            </a>
-          </CursorTag>
-          <CursorTag label="open in new tab ↗">
-            <a
-              href="https://x.com/ericxxie"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={contactLink}
-            >
-              X
-            </a>
-          </CursorTag>
+          {[
+            { label: "LinkedIn", href: SOCIALS.linkedin },
+            { label: "X", href: SOCIALS.x },
+          ].map(({ label, href }) => (
+            <CursorTag key={label} label="open in new tab ↗">
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={contactLink}
+              >
+                {label}
+              </a>
+            </CursorTag>
+          ))}
         </div>
       </div>
       <div

@@ -2,13 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { MoonIcon } from "@heroicons/react/20/solid";
@@ -25,6 +19,7 @@ import { useTheme } from "next-themes";
 import { FaXTwitter } from "react-icons/fa6";
 import { IoLogoGithub, IoLogoLinkedin } from "react-icons/io5";
 
+import { SOCIALS } from "@/content/socials";
 import { cn } from "@/utils/cn";
 import type { PostItem, ProjectItem } from "@/types";
 
@@ -259,7 +254,7 @@ export default function CommandPalette({
         section: "Socials",
         keywords: ["connect", "profile"],
         icon: <IoLogoLinkedin className="h-5 w-5" />,
-        perform: openExternal("https://www.linkedin.com/in/ericcxie"),
+        perform: openExternal(SOCIALS.linkedin),
       },
       {
         id: "social-github",
@@ -267,7 +262,7 @@ export default function CommandPalette({
         section: "Socials",
         keywords: ["code", "repos"],
         icon: <IoLogoGithub className="h-5 w-5" />,
-        perform: openExternal("https://github.com/ericcxie"),
+        perform: openExternal(SOCIALS.github),
       },
       {
         id: "social-x",
@@ -275,7 +270,7 @@ export default function CommandPalette({
         section: "Socials",
         keywords: ["tweet", "twitter"],
         icon: <FaXTwitter className="h-5 w-5" />,
-        perform: openExternal("https://x.com/ericxxie"),
+        perform: openExternal(SOCIALS.x),
       },
       {
         id: "toggle-theme",
@@ -509,7 +504,9 @@ export default function CommandPalette({
                           </span>
                           {item.subtitle && (
                             <span className="shrink-0 text-xs text-text-light-body dark:text-text-dark-headerDark">
-                              {copied === item.label ? "Copied!" : item.subtitle}
+                              {copied === item.label
+                                ? "Copied!"
+                                : item.subtitle}
                             </span>
                           )}
                         </button>

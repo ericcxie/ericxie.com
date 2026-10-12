@@ -1,8 +1,8 @@
 import PostList from "./components/PostList";
-import { getCategorizedPosts } from "@/lib/blogs";
+import { getAllPosts } from "@/lib/blogs";
 
 export default function Blog() {
-  const posts = getCategorizedPosts();
+  const posts = getAllPosts();
   return (
     <main className="flex flex-col gap-4">
       <h1

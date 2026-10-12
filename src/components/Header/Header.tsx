@@ -222,14 +222,14 @@ export default function Header() {
                 leaveFrom="opacity-100 scale-100 translate-y-0"
                 leaveTo="opacity-0 scale-95 -translate-y-1"
               >
-                <Popover.Panel className="bg-primary absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-auto rounded-xl border border-neutral-400 bg-background-light p-2 text-base shadow-lg focus:outline-none dark:bg-background-dark sm:text-sm">
+                <Popover.Panel className="absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-auto rounded-xl border border-neutral-400 bg-background-light p-2 text-base shadow-lg focus:outline-none dark:bg-background-dark sm:text-sm">
                   <div className="grid">
                     {links.map((link) => (
                       <Link
                         key={link.href}
                         href={link.href}
                         className={clsx(
-                          "hover:text-primary rounded-md px-4 py-2 transition-colors",
+                          "rounded-md px-4 py-2 transition-colors",
                           pathname === link.href
                             ? "bg-gray-200 font-medium dark:bg-stone-800/80"
                             : "font-normal",

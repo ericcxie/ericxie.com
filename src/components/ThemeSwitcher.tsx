@@ -11,18 +11,15 @@ export default function ThemeSwitcher() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  const iconClassName = clsx(
-    "w-5 h-5 text-text-light-body group-hover:text-text-light-headerLight dark:text-text-dark-headerDark dark:group-hover:text-text-dark-header cursor-pointer transition duration-500",
-  );
+  const iconClassName =
+    "w-5 h-5 text-text-light-body group-hover:text-text-light-headerLight dark:text-text-dark-headerDark dark:group-hover:text-text-dark-header cursor-pointer transition duration-500";
 
   return (
     <div className="group relative">
       <button
         onClick={toggleTheme}
         aria-label="Toggle theme"
-        className={clsx(
-          "relative flex h-8 w-8 cursor-default items-center justify-center rounded-lg border border-neutral-200 transition duration-500 group-hover:border-neutral-400 dark:border-neutral-800 dark:group-hover:border-neutral-600",
-        )}
+        className="relative flex h-8 w-8 cursor-default items-center justify-center rounded-lg border border-neutral-200 transition duration-500 group-hover:border-neutral-400 dark:border-neutral-800 dark:group-hover:border-neutral-600"
       >
         {/* Both icons render from the server; the `dark` class that
             next-themes puts on <html> before first paint picks which one

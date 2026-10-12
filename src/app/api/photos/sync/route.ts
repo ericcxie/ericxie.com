@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAuthorized, unauthorized } from "@/lib/server/auth";
+import { dispatchPhotoSync } from "@/lib/server/github";
 
-const GITHUB_REPO = "ericcxie/ericxie.ca";
-
-function isAuthorized(request: NextRequest): boolean {
-  const password = request.headers.get("x-upload-password");
-  return password === process.env.UPLOAD_PASSWORD;
-}
-
+// Re-runs the Blob → repo sync by hand, e.g. after a failed action
 export async function POST(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!isAuthorized(request)) return unauthorized();
 
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
@@ -20,22 +14,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const res = await fetch(
-    `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/sync-photos.yml/dispatches`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-      body: JSON.stringify({ ref: "main" }),
-    },
-  );
-
+  const res = await dispatchPhotoSync(token);
   if (!res.ok) {
     const body = await res.text();
     return NextResponse.json(
-      { error: `GitHub API error: ${res.status} ${res.statusText}`, detail: body },
+      {
+        error: `GitHub API error: ${res.status} ${res.statusText}`,
+        detail: body,
+      },
       { status: 502 },
     );
   }

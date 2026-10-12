@@ -1,20 +1,10 @@
-import Post from "./Post";
+import Link from "next/link";
+import moment from "moment";
+import { CursorTag } from "@/components/ui/CursorTag";
 import type { PostItem } from "@/types";
 
-interface Props {
-  posts: Record<string, PostItem[]>;
-}
-
-const PostList = ({ posts }: Props) => {
-  const allPosts = Object.entries(posts).flatMap(([category, postItems]) =>
-    postItems.map((postItem) => ({ ...postItem, category })),
-  );
-
-  allPosts.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
-
-  if (allPosts[0].id === ".gitkeep") {
+const PostList = ({ posts }: { posts: PostItem[] }) => {
+  if (posts.length === 0) {
     return (
       <div className="italic text-text-light-body dark:text-text-dark-body">
         Stay tuned!
@@ -24,9 +14,28 @@ const PostList = ({ posts }: Props) => {
 
   return (
     <ul className="animated-list">
-      {allPosts.map((post, index) => (
-        <li key={index}>
-          <Post category={post.category} posts={[post]} key={index} />
+      {posts.map((post) => (
+        <li
+          key={post.id}
+          className="flex items-start justify-start gap-4 md:gap-10"
+        >
+          <div className="w-24 flex-shrink-0 text-sm text-text-light-body dark:text-text-dark-headerDark md:w-32 md:text-base">
+            {moment(post.date, "MM-DD-YYYY").format("MMM DD, YYYY")}
+          </div>
+          <CursorTag
+            label={
+              post.readingTime
+                ? `read post · ${post.readingTime} min`
+                : "read post"
+            }
+          >
+            <Link
+              href={`/writing/${post.id}`}
+              className="block hover:underline"
+            >
+              {post.title}
+            </Link>
+          </CursorTag>
         </li>
       ))}
     </ul>

@@ -12,14 +12,7 @@ import { list, del, put } from "@vercel/blob";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { locationCoordinates } from "../src/content/photos/locations";
-
-interface PhotoEntry {
-  filename: string;
-  date: string;
-  location: string;
-  lng?: number;
-  lat?: number;
-}
+import type { PhotoEntry, PhotoMetadata } from "../src/types";
 
 const MAPBOX_TOKEN =
   process.env.MAPBOX_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -55,15 +48,6 @@ async function geocode(location: string): Promise<[number, number] | null> {
   }
 }
 
-interface BlobMetadataEntry {
-  url: string;
-  filename: string;
-  location: string;
-  lng?: number;
-  lat?: number;
-  date: string;
-}
-
 const PHOTOS_DIR = join(process.cwd(), "public", "img", "photos");
 const PHOTOS_JSON = join(
   process.cwd(),
@@ -74,7 +58,7 @@ const PHOTOS_JSON = join(
 );
 const METADATA_KEY = "photos-metadata.json";
 
-async function getBlobMetadata(): Promise<BlobMetadataEntry[]> {
+async function getBlobMetadata(): Promise<PhotoMetadata[]> {
   const { blobs } = await list({ prefix: METADATA_KEY });
   if (blobs.length === 0) return [];
   const res = await fetch(blobs[0].url);
