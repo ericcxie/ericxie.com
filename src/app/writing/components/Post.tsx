@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CursorTag } from "@/components/ui/CursorTag";
 import type { PostItem } from "@/types";
 import moment from "moment";
 interface Props {
@@ -17,9 +18,20 @@ const Post = ({ category, posts }: Props) => {
           <div className="w-24 flex-shrink-0 text-sm text-text-light-body dark:text-text-dark-headerDark md:w-32 md:text-base">
             {moment(post.date, "MM-DD-YYYY").format("MMM DD, YYYY")}
           </div>
-          <Link href={`/writing/${post.id}`} className="block hover:underline">
-            {post.title}
-          </Link>
+          <CursorTag
+            label={
+              post.readingTime
+                ? `read post · ${post.readingTime} min`
+                : "read post"
+            }
+          >
+            <Link
+              href={`/writing/${post.id}`}
+              className="block hover:underline"
+            >
+              {post.title}
+            </Link>
+          </CursorTag>
         </div>
       ))}
     </div>

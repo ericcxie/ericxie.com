@@ -19,7 +19,7 @@ export default function Photos() {
         Photos
       </h1>
       <p
-        className="animate-in text-text-light-body dark:text-text-dark-body"
+        className="animate-in text-text-light-headerLight dark:text-text-dark-body"
         style={{ "--index": 2 } as React.CSSProperties}
       >
         I like to capture the little moments in my life

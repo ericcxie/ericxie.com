@@ -41,7 +41,7 @@ export default function ProjectCarousel({
                   className="group-hover:border-neutral-400 dark:group-hover:border-neutral-600"
                 />
                 <div className="mt-3 text-sm md:text-base">
-                  <h2 className="font-bold text-text-light-headerLight dark:text-white">
+                  <h2 className="font-bold text-text-light-header dark:text-white">
                     {project.title}
                   </h2>
                   <p className="truncate text-text-light-body dark:text-text-dark-headerDark">

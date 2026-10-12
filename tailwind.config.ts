@@ -20,16 +20,24 @@ module.exports = {
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
         in: "in .6s both",
+        wave: "wave 2s ease-in-out infinite",
         "in-reverse": "in-reverse .6s both",
         spotlight: "spotlight 2s ease .75s 1 forwards",
-        "infinite-progress":
-          "infinite-progress 1.5s ease-in-out infinite",
+        "infinite-progress": "infinite-progress 1.5s ease-in-out infinite",
       },
       keyframes: {
         scroll: {
           to: {
             transform: "translate(calc(-50% - 0.5rem))",
           },
+        },
+        // A couple of waves, then a rest before the next
+        wave: {
+          "0%, 60%, 100%": { transform: "rotate(0deg)" },
+          "10%, 30%": { transform: "rotate(14deg)" },
+          "20%": { transform: "rotate(-8deg)" },
+          "40%": { transform: "rotate(-4deg)" },
+          "50%": { transform: "rotate(10deg)" },
         },
         in: {
           "0%": { transform: "translateY(18px)", opacity: 0 },
@@ -58,6 +66,7 @@ module.exports = {
       fontFamily: {
         akkurat: ["var(--font-akkurat)", "sans-serif"],
         system: ["-apple-system", "sans-serif"],
+        serif: ["var(--font-serif)", "serif"],
       },
       colors: {
         background: {

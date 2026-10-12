@@ -14,12 +14,13 @@ import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import landTopology from "world-atlas/land-110m.json";
 
+import { CursorTag } from "@/components/ui/CursorTag";
 import PhotoLightbox from "@/components/ui/PhotoLightbox";
 import type { Place } from "@/content/photos/locations";
 
 // A line-drawn globe in the same spirit as the hairline figures: one canvas of
 // thin strokes, with the photo pins as HTML on top so they keep their thumbnails,
-// hover previews and lightbox.
+// cursor labels and lightbox.
 
 const topology = landTopology as unknown as Topology<{
   land: GeometryCollection;
@@ -33,7 +34,6 @@ const DEGREES_PER_SECOND = 3; // one turn every two minutes
 const RESUME_AFTER_MS = 1500;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4; // the world outline is simplified, so it gets blocky past this
-const POPUP_HEIGHT = 165; // the preview card: 110px photo plus its caption
 
 const PALETTE = {
   dark: {
@@ -63,12 +63,6 @@ export default function PlacesGlobe({ places }: { places: Place[] }) {
   // (otherwise they'd flash in the corner and fetch thumbnails during page load)
   const [ready, setReady] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
-  // Where the preview card goes: above the pin, or below it near the top edge
-  const [popup, setPopup] = useState<{
-    x: number;
-    y: number;
-    below: boolean;
-  } | null>(null);
 
   const { resolvedTheme } = useTheme();
   const colors = resolvedTheme === "light" ? PALETTE.light : PALETTE.dark;
@@ -306,36 +300,28 @@ export default function PlacesGlobe({ places }: { places: Place[] }) {
         />
         {ready &&
           places.map((place, i) => (
-            <button
-              key={place.location}
-              ref={(el) => {
-                pinRefs.current[i] = el;
-              }}
-              type="button"
-              className="place-marker absolute left-0 top-0"
-              aria-label={`Photos from ${place.location}`}
-              style={{ backgroundImage: `url(${optimized(place.image, 96)})` }}
-              onPointerEnter={(e) => {
-                const box = e.currentTarget.getBoundingClientRect();
-                const wrapBox = wrapRef.current!.getBoundingClientRect();
-                const top = box.top - wrapBox.top;
-                const below = top < POPUP_HEIGHT + 16;
-                setPopup({
-                  x: box.left + box.width / 2 - wrapBox.left,
-                  y: below ? box.bottom - wrapBox.top + 10 : top - 10,
-                  below,
-                });
-                setHovered(i);
-              }}
-              onPointerLeave={() => setHovered(null)}
-              onClick={() => setActivePlace(place)}
-            >
-              {place.count > 1 && (
-                <span className="place-marker__badge">{place.count}</span>
-              )}
-            </button>
+            <CursorTag key={place.location} label={place.location}>
+              <button
+                ref={(el) => {
+                  pinRefs.current[i] = el;
+                }}
+                type="button"
+                className="place-marker absolute left-0 top-0"
+                aria-label={`Photos from ${place.location}`}
+                style={{
+                  backgroundImage: `url(${optimized(place.image, 96)})`,
+                }}
+                onPointerEnter={() => setHovered(i)}
+                onPointerLeave={() => setHovered(null)}
+                onClick={() => setActivePlace(place)}
+              >
+                {place.count > 1 && (
+                  <span className="place-marker__badge">{place.count}</span>
+                )}
+              </button>
+            </CursorTag>
           ))}
-        <div className="absolute bottom-3 right-3 z-10 flex flex-col overflow-hidden rounded-lg opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 border border-neutral-200 bg-background-light/80 backdrop-blur dark:border-neutral-800 dark:bg-background-dark/80">
+        <div className="absolute bottom-3 right-3 z-10 flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-background-light/80 opacity-0 backdrop-blur transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 dark:border-neutral-800 dark:bg-background-dark/80">
           {[
             { label: "Zoom in", factor: 1.6, Icon: Plus },
             { label: "Zoom out", factor: 1 / 1.6, Icon: Minus },
@@ -351,35 +337,6 @@ export default function PlacesGlobe({ places }: { places: Place[] }) {
             </button>
           ))}
         </div>
-        {hovered !== null && popup && (
-          <div
-            className="pointer-events-none absolute z-10"
-            style={{
-              left: popup.x,
-              top: popup.y,
-              transform: popup.below
-                ? "translate(-50%, 0)"
-                : "translate(-50%, -100%)",
-            }}
-          >
-            <div className="place-popup__inner">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={optimized(places[hovered].image, 384)}
-                alt={places[hovered].location}
-              />
-              <div className="place-popup__meta">
-                <span className="place-popup__loc">
-                  {places[hovered].location}
-                </span>
-                <span className="place-popup__count">
-                  {places[hovered].count} photo
-                  {places[hovered].count > 1 ? "s" : ""}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       <PhotoLightbox
         photos={

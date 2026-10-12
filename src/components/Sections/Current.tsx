@@ -52,7 +52,7 @@ export default function Current() {
   return (
     <>
       <h1 className="mb-1 text-xl font-bold">Places I&apos;ve Been</h1>
-      <p className="mb-3 text-sm text-text-light-body dark:text-text-dark-body md:text-base">
+      <p className="mb-3 text-sm text-text-light-headerLight dark:text-text-dark-body md:text-base">
         Here&apos;s a map of some places I&apos;ve taken my camera.
       </p>
       <PlacesGlobe places={places} />

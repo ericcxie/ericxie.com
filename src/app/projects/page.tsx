@@ -19,7 +19,7 @@ export default function Projects() {
         Projects
       </h1>
       <p
-        className="max-w-xl animate-in text-sm text-text-light-body dark:text-text-dark-body md:text-base"
+        className="max-w-xl animate-in text-sm text-text-light-headerLight dark:text-text-dark-body md:text-base"
         style={{ "--index": 2 } as React.CSSProperties}
       >
         Things I&apos;ve built at work and in the community.
@@ -41,7 +41,7 @@ export default function Projects() {
             />
             <div className="mt-3">
               <div className="flex items-baseline justify-between gap-2">
-                <h2 className="font-bold text-text-light-headerLight dark:text-white">
+                <h2 className="font-bold text-text-light-header dark:text-white">
                   {project.title}
                   <span className="ml-2 font-normal text-text-light-body dark:text-text-dark-headerDark">
                     {project.company}
@@ -51,7 +51,7 @@ export default function Projects() {
                   {project.timeline.split(" ").pop()}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-text-light-body dark:text-text-dark-body">
+              <p className="mt-1 text-sm text-text-light-headerLight dark:text-text-dark-body">
                 {project.description}
               </p>
             </div>

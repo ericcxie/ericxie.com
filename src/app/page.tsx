@@ -3,8 +3,17 @@ import Experiences from "@/components/Sections/Experiences";
 import LatestPosts from "@/components/Sections/LatestPosts";
 import Projects from "@/components/Sections/Projects";
 import EmailCopyLink from "@/components/EmailCopyLink";
+import { CursorTag } from "@/components/ui/CursorTag";
+import Link from "next/link";
 
 import { Spotlight } from "@/components/ui/Spotlight";
+
+// A company in the intro, linked to the project I did there
+const Company = ({ name, slug }: { name: string; slug: string }) => (
+  <CursorTag label="view project">
+    <Link href={`/projects/${slug}`}>{name}</Link>
+  </CursorTag>
+);
 
 const contactLink =
   "cursor-pointer bg-transparent p-0 text-text-light-body transition-colors hover:text-text-light-header dark:text-text-dark-headerDark dark:hover:text-white";
@@ -18,20 +27,31 @@ export default function Home() {
           fill="white"
         />
         <h1
-          className="animate-in font-system text-3xl font-bold"
+          className="animate-in font-serif text-[26px] leading-9"
           style={{ "--index": 1 } as React.CSSProperties}
         >
-          Eric Xie
+          <CursorTag
+            label={
+              <span className="inline-block origin-[70%_70%] text-sm motion-safe:animate-wave">
+                👋
+              </span>
+            }
+          >
+            Hey there, I&rsquo;m Eric Xie!
+          </CursorTag>
         </h1>
         <p
-          className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-body dark:text-text-dark-body md:text-base"
+          className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-headerLight dark:text-text-dark-body md:text-base"
           style={{ "--index": 2 } as React.CSSProperties}
         >
-          I currently study Computer Engineering at the University of
-          Waterloo. I&apos;ve previously worked at Amazon, Gem and Shopify.
+          I currently study Computer Engineering at the University of Waterloo.
+          I&apos;ve previously worked at{" "}
+          <Company name="Amazon" slug="data-lineage-tracer" />,{" "}
+          <Company name="Gem" slug="talent-pipeline" /> and{" "}
+          <Company name="Shopify" slug="shopify-vc" />.
         </p>
         <p
-          className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-body dark:text-text-dark-body md:text-base"
+          className="mt-4 max-w-2xl animate-in text-sm leading-relaxed text-text-light-headerLight dark:text-text-dark-body md:text-base"
           style={{ "--index": 3 } as React.CSSProperties}
         >
           If you&apos;re building something interesting or just want to chat,
@@ -42,22 +62,26 @@ export default function Home() {
           style={{ "--index": 4 } as React.CSSProperties}
         >
           <EmailCopyLink label="Email" className={contactLink} />
-          <a
-            href="https://www.linkedin.com/in/ericcxie/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={contactLink}
-          >
-            LinkedIn
-          </a>
-          <a
-            href="https://x.com/ericxxie"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={contactLink}
-          >
-            X
-          </a>
+          <CursorTag label="open in new tab ↗">
+            <a
+              href="https://www.linkedin.com/in/ericcxie/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={contactLink}
+            >
+              LinkedIn
+            </a>
+          </CursorTag>
+          <CursorTag label="open in new tab ↗">
+            <a
+              href="https://x.com/ericxxie"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={contactLink}
+            >
+              X
+            </a>
+          </CursorTag>
         </div>
       </div>
       <div

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CursorTag } from "@/components/ui/CursorTag";
 
 const EMAIL = "pexie@uwaterloo.ca";
 
@@ -52,18 +53,20 @@ export default function EmailCopyLink({
 
   return (
     <span className="relative inline-block">
-      <button
-        type="button"
-        onClick={copyEmail}
-        className={className}
-        aria-label={`Copy ${EMAIL} to clipboard`}
-        title="Copy email address"
-      >
-        {label}
-      </button>
+      <CursorTag label={copied ? "copied!" : "click to copy"}>
+        <button
+          type="button"
+          onClick={copyEmail}
+          className={className}
+          aria-label={`Copy ${EMAIL} to clipboard`}
+        >
+          {label}
+        </button>
+      </CursorTag>
+      {/* Touch gets this bubble; a mouse gets the cursor tag instead */}
       <span
         role="status"
-        className={`pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-neutral-900 px-2 py-1 text-xs text-white shadow-sm transition-all duration-150 dark:bg-neutral-100 dark:text-neutral-900 ${
+        className={`pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-neutral-900 px-2 py-1 text-xs text-white shadow-sm transition-all duration-150 dark:bg-neutral-100 dark:text-neutral-900 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 ${
           copied ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
         }`}
       >

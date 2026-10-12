@@ -12,7 +12,7 @@ export default function Blog() {
         Writing
       </h1>
       <p
-        className="max-w-xl animate-in text-sm text-text-light-body dark:text-text-dark-body md:text-base"
+        className="max-w-xl animate-in text-sm text-text-light-headerLight dark:text-text-dark-body md:text-base"
         style={{ "--index": 2 } as React.CSSProperties}
       >
         I occasionally write about things that I find interesting.

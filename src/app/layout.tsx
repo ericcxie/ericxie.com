@@ -6,6 +6,7 @@ import { getAllProjects } from "@/lib/projects";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
+import { Libre_Baskerville } from "next/font/google";
 import local from "next/font/local";
 import "./globals.css";
 
@@ -15,6 +16,12 @@ const akkurat = local({
     { path: "../../public/fonts/AkkuratPro-Bold.otf", weight: "700" },
   ],
   variable: "--font-akkurat",
+});
+
+const serif = Libre_Baskerville({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +40,7 @@ export default function RootLayout({
     // next-themes sets the theme class on <html> before React hydrates
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${akkurat.className} flex min-h-screen flex-col bg-background-light dark:bg-background-dark`}
+        className={`${akkurat.className} ${serif.variable} flex min-h-screen flex-col bg-background-light dark:bg-background-dark`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Header />

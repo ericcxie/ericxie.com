@@ -9,9 +9,8 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { Command } from "lucide-react";
 
+import { Signature } from "@/components/Header/Signature";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-
-import local from "next/font/local";
 
 const links = [
   { label: "Projects", href: "/projects" },
@@ -19,9 +18,11 @@ const links = [
   { label: "Photos", href: "/photos" },
 ];
 
-const autograf = local({
-  src: [{ path: "../../../public/fonts/Autograf.ttf", weight: "400" }],
-  variable: "--font-autograf",
+// The nav drops in one item at a time while the signature writes itself. Both
+// wait for hydration, since that's when the signature can start.
+const dropIn = (i: number, mounted: boolean) => ({
+  className: mounted ? "animate-in-reverse" : "opacity-0",
+  style: { animationDelay: `${200 + i * 150}ms` },
 });
 
 const menuLine =
@@ -58,6 +59,9 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [disableAnimation, setDisableAnimation] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,23 +96,27 @@ export default function Header() {
       <nav className="mx-auto flex max-w-[700px] items-center justify-between gap-3 px-4 py-3 md:px-6">
         <Link
           href="/"
-          className="ml-2 shrink-0 text-text-light-body dark:text-text-dark-headerDark md:ml-0"
+          className="ml-2 shrink-0 text-text-light-body transition-colors duration-300 hover:text-text-light-header dark:text-text-dark-headerDark dark:hover:text-white md:ml-0"
           onClick={() => setDisableAnimation(true)}
         >
-          <h1 className={`${autograf.className} text-3xl`}>Eric</h1>
+          <h1 className="flex h-9 items-center text-3xl">
+            <span className="sr-only">Eric</span>
+            <Signature className="h-[1em]" />
+          </h1>
         </Link>
         <div className="hidden gap-2 md:flex">
-          {links.map((item) => {
+          {links.map((item, i) => {
             const isActive = item.href === pathname;
 
             return (
               <Link
                 key={item.href}
-                className={`relative rounded-md px-4 py-1 text-sm no-underline duration-300 ease-in lg:text-base ${
+                className={`relative rounded-md px-4 py-1 text-sm no-underline duration-300 ease-in lg:text-base ${dropIn(i, mounted).className} ${
                   isActive
                     ? "text-text-light-headerLight dark:text-text-dark-header"
                     : "text-text-light-body dark:text-text-dark-headerDark"
                 }`}
+                style={dropIn(i, mounted).style}
                 data-active={isActive}
                 href={item.href}
                 onClick={() => setDisableAnimation(true)}
@@ -147,7 +155,10 @@ export default function Header() {
           })}
         </div>
 
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
+        <div
+          className={`ml-auto flex items-center gap-2 md:ml-0 ${dropIn(links.length, mounted).className}`}
+          style={dropIn(links.length, mounted).style}
+        >
           <button
             type="button"
             aria-label="Open command menu"
@@ -170,7 +181,11 @@ export default function Header() {
         </div>
 
         {/* Mobile menu bar */}
-        <Popover ref={menuRef} className="relative md:hidden">
+        <Popover
+          ref={menuRef}
+          className={`relative md:hidden ${dropIn(links.length + 1, mounted).className}`}
+          style={dropIn(links.length + 1, mounted).style}
+        >
           {({ open, close }) => (
             <>
               {open && <CloseOnOutside rootRef={menuRef} close={close} />}
