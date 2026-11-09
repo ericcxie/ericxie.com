@@ -1,6 +1,7 @@
 import CommandPalette from "@/components/CommandPalette/CommandPalette";
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
+import { Snowfall } from "@/components/ui/Snowfall";
 import { getAllPosts } from "@/lib/blogs";
 import { getAllProjects } from "@/lib/projects";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -49,6 +50,7 @@ export default function RootLayout({
             {children}
           </div>
           <Footer />
+          <Snowfall />
         </ThemeProvider>
         <Analytics />
       </body>

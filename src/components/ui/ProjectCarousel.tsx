@@ -22,7 +22,11 @@ export default function ProjectCarousel({
   ]);
 
   return (
-    <div className="relative overflow-hidden pt-4 [mask-image:linear-gradient(to_right,transparent,white_12%,white_88%,transparent)]">
+    // The cards never stop moving, so snow doesn't get to settle on them
+    <div
+      data-no-snow
+      className="relative overflow-hidden pt-4 [mask-image:linear-gradient(to_right,transparent,white_12%,white_88%,transparent)]"
+    >
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y">
           {projects.map((project) => (

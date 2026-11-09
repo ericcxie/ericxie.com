@@ -19,7 +19,10 @@ export default function Footer() {
     year: "numeric",
   }).format(lastUpdatedDate);
   return (
-    <footer className="inset-x-0 border-t border-neutral-200 bg-background-light py-3 text-text-light-body dark:border-neutral-800 dark:bg-background-dark dark:text-text-dark-body">
+    <footer
+      data-snow
+      className="inset-x-0 border-t border-neutral-200 bg-background-light py-3 text-text-light-body dark:border-neutral-800 dark:bg-background-dark dark:text-text-dark-body"
+    >
       <div className="mx-auto flex max-w-[700px] items-center justify-between px-6 text-center md:flex-row md:px-6">
         <div className="flex flex-col justify-start text-start">
           <p className="text-xs md:text-sm">

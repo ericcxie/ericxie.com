@@ -290,6 +290,7 @@ export default function PlacesGlobe({ places }: { places: Place[] }) {
     <>
       <div
         ref={wrapRef}
+        data-snow
         className="group relative w-full cursor-grab touch-pan-y select-none overflow-hidden rounded-2xl border border-neutral-200 active:cursor-grabbing dark:border-neutral-800"
         style={{ aspectRatio: "1 / 1", maxHeight: MAX_HEIGHT }}
       >

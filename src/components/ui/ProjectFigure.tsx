@@ -50,6 +50,7 @@ export const ProjectFigure = ({
 
   return (
     <div
+      data-snow
       className={cn(
         "relative overflow-hidden rounded-2xl border border-neutral-200 transition-colors duration-300 dark:border-neutral-800",
         className,

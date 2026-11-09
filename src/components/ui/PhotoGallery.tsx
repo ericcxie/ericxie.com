@@ -47,7 +47,10 @@ export const PhotoGallery = ({
               className="group block w-full text-left"
               onClick={() => setLightboxIndex(i)}
             >
-              <div className="relative aspect-[2/3] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 transition-colors duration-300 group-hover:border-neutral-400 dark:border-neutral-800 dark:bg-neutral-900 dark:group-hover:border-neutral-600">
+              <div
+                data-snow
+                className="relative aspect-[2/3] overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 transition-colors duration-300 group-hover:border-neutral-400 dark:border-neutral-800 dark:bg-neutral-900 dark:group-hover:border-neutral-600"
+              >
                 <Image
                   src={photo.image}
                   fill

@@ -8,7 +8,10 @@ export const NotFoundFigure = () => {
   const [read, setRead] = useState("");
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
+    <div
+      data-snow
+      className="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800"
+    >
       <Plug
         label="A plug that can't reach its socket"
         onRead={setRead}
