@@ -14,13 +14,14 @@ import {
   SunIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { Calculator, CalendarClock, Snowflake } from "lucide-react";
+import { Calculator, CalendarClock, Fish, Snowflake } from "lucide-react";
 import { useTheme } from "next-themes";
 import { FaXTwitter } from "react-icons/fa6";
 import { IoLogoGithub, IoLogoLinkedin } from "react-icons/io5";
 
 import { SOCIALS } from "@/content/socials";
 import { useSnowfall } from "@/lib/useSnowfall";
+import { useZen } from "@/lib/useZen";
 import { cn } from "@/utils/cn";
 import type { PostItem, ProjectItem } from "@/types";
 
@@ -154,8 +155,6 @@ type CommandItem = {
   perform: () => void;
   subtitle?: string;
   closeOnSelect?: boolean;
-  // Easter eggs: left out of the list until one of their keywords is typed
-  hidden?: boolean;
 };
 
 export default function CommandPalette({
@@ -168,6 +167,7 @@ export default function CommandPalette({
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const { isSnowing, toggle: toggleSnow } = useSnowfall();
+  const { isZen, toggle: toggleZen } = useZen();
 
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
@@ -301,9 +301,19 @@ export default function CommandPalette({
         section: "General",
         keywords: ["snow", "let it snow", "stop the snow", "christmas", "xmas"],
         icon: <Snowflake className="h-5 w-5" />,
-        hidden: true,
         perform: () => {
           toggleSnow();
+          close();
+        },
+      },
+      {
+        id: "toggle-zen",
+        label: isZen ? "Leave the pond" : "Zen mode",
+        section: "General",
+        keywords: ["zen", "zen mode", "pond", "koi", "calm", "relax", "leave"],
+        icon: <Fish className="h-5 w-5" />,
+        perform: () => {
+          toggleZen();
           close();
         },
       },
@@ -317,6 +327,8 @@ export default function CommandPalette({
     projects,
     isSnowing,
     toggleSnow,
+    isZen,
+    toggleZen,
   ]);
 
   // Computed, query-driven results (calculator, date) — Raycast style.
@@ -355,15 +367,8 @@ export default function CommandPalette({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return items.filter((item) => !item.hidden);
+    if (!q) return items;
     const matches = items.filter((item) => {
-      if (item.hidden) {
-        // Needs a few letters of a keyword, so a stray "s" doesn't give it away
-        return (
-          q.length >= 3 &&
-          (item.keywords ?? []).some((keyword) => keyword.startsWith(q))
-        );
-      }
       const haystack = [item.label, item.section, ...(item.keywords ?? [])]
         .join(" ")
         .toLowerCase();
